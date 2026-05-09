@@ -1,0 +1,4017 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b0b0b" />
+  <title>B1 Deutsch Trainer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            flag: { red: '#DD0000', gold: '#FFCE00', ink: '#0b0b0b' },
+            paper: '#fafaf7',
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    html, body { background: #fafaf7; }
+    body { -webkit-tap-highlight-color: transparent; }
+
+    .flag-stripe {
+      background: linear-gradient(to right, #0b0b0b 0 33.33%, #DD0000 33.33% 66.66%, #FFCE00 66.66% 100%);
+    }
+
+    @keyframes fadeIn        { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes slideUp       { from { opacity:0; transform:translateY(28px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes slideRight    { from { opacity:0; transform:translateX(20px); } to { opacity:1; transform:translateX(0); } }
+    @keyframes pop           { 0%{transform:scale(.9);opacity:0;} 60%{transform:scale(1.04);opacity:1;} 100%{transform:scale(1);} }
+    @keyframes shake         { 0%,100%{transform:translateX(0);} 25%{transform:translateX(-5px);} 75%{transform:translateX(5px);} }
+    @keyframes streakPulse   { 0%,100%{transform:scale(1);} 50%{transform:scale(1.15);} }
+    @keyframes summaryIn     { 0%{opacity:0;transform:translateY(40px) scale(.94);} 100%{opacity:1;transform:translateY(0) scale(1);} }
+    @keyframes flashIn       { 0%{opacity:0;} 40%{opacity:1;} 100%{opacity:0;} }
+    @keyframes toastIn       { from{opacity:0;transform:translate(-50%,12px);} to{opacity:1;transform:translate(-50%,0);} }
+    @keyframes drop          { 0%{transform:translateY(-6px);} 60%{transform:translateY(2px);} 100%{transform:translateY(0);} }
+    @keyframes greenPulse    { 0%{box-shadow:0 0 0 0 rgba(34,197,94,.5);} 70%{box-shadow:0 0 0 8px rgba(34,197,94,0);} 100%{box-shadow:0 0 0 0 rgba(34,197,94,0);} }
+    @keyframes redShake      { 0%,100%{transform:translateX(0);} 25%{transform:translateX(-3px);} 75%{transform:translateX(3px);} }
+    @keyframes hintSlide     { from { opacity:0; transform:translateY(-8px); max-height:0; } to { opacity:1; transform:translateY(0); max-height:240px; } }
+    @keyframes dirSlideRight { 0%,100%{transform:translateX(0);} 50%{transform:translateX(4px);} }
+    @keyframes dirSlideLeft  { 0%,100%{transform:translateX(0);} 50%{transform:translateX(-4px);} }
+    @keyframes dirPulse      { 0%,100%{transform:scale(1);} 50%{transform:scale(1.05);} }
+    @keyframes clusterPulse  { 0%,100%{background-color:transparent;} 30%,70%{background-color:rgba(255,206,0,.35);} }
+
+    .anim-in       { animation: fadeIn .22s ease-out; }
+    .anim-slideup  { animation: slideUp .28s cubic-bezier(.2,.9,.3,1.2); }
+    .anim-slide    { animation: slideRight .25s ease-out; }
+    .anim-pop      { animation: pop .28s ease-out; }
+    .anim-shake    { animation: shake .3s; }
+    .anim-streak   { animation: streakPulse .35s ease-out; }
+    .anim-summary  { animation: summaryIn .42s cubic-bezier(.2,.9,.3,1.2); }
+    .anim-flash    { animation: flashIn .25s ease-out; }
+    .anim-toast    { animation: toastIn .22s ease-out; }
+    .anim-drop     { animation: drop .22s ease-out; }
+    .anim-hint     { animation: hintSlide .3s ease-out; overflow: hidden; }
+    .anim-cluster  { animation: clusterPulse 1.1s ease-out; }
+    .dir-wo        { animation: dirPulse 1.6s ease-in-out infinite; display:inline-block; }
+    .dir-wohin     { animation: dirSlideRight 1.6s ease-in-out infinite; display:inline-block; }
+    .dir-woher     { animation: dirSlideLeft 1.6s ease-in-out infinite; display:inline-block; }
+
+    .progress-bar { transition: width .35s cubic-bezier(.4,0,.2,1); }
+
+    button, input, select, textarea { -webkit-appearance: none; appearance: none; }
+    button:focus-visible, input:focus-visible, select:focus-visible, [tabindex]:focus-visible {
+      outline: 3px solid #FFCE00; outline-offset: 2px;
+    }
+
+    /* Article pill */
+    .pill {
+      display: inline-flex; align-items: center; justify-content: center;
+      padding: .85rem 1rem; border-radius: 9999px;
+      border: 2px solid #e5e5e5; background: white;
+      font-weight: 600; font-size: 1.05rem; min-width: 4.25rem;
+      transition: all .12s ease; cursor: pointer;
+    }
+    .pill:hover { border-color: #d4d4d4; }
+    .pill.active-der { background: #0b0b0b; color: #fff; border-color: #0b0b0b; }
+    .pill.active-die { background: #DD0000; color: #fff; border-color: #DD0000; }
+    .pill.active-das { background: #FFCE00; color: #0b0b0b; border-color: #FFCE00; }
+
+    .article-tag-der { background: #0b0b0b; color: #fff; }
+    .article-tag-die { background: #DD0000; color: #fff; }
+    .article-tag-das { background: #FFCE00; color: #0b0b0b; }
+
+    /* Token chips for Nebensatz */
+    .token-chip {
+      display: inline-flex; align-items: center; justify-content: center;
+      padding: .55rem .85rem; border-radius: .75rem;
+      background: white; border: 2px solid #e5e5e5;
+      font-weight: 600; font-size: 1rem;
+      cursor: grab; user-select: none;
+      transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease, background .15s ease;
+      box-shadow: 0 1px 2px rgba(0,0,0,.04);
+    }
+    .token-chip:hover { border-color: #cbd5e1; box-shadow: 0 4px 8px rgba(0,0,0,.06); transform: translateY(-1px); }
+    .token-chip:active { cursor: grabbing; transform: scale(.97); }
+    .token-ghost  { opacity: .35; transform: rotate(2deg); }
+    .token-drag   { transform: rotate(-2deg) scale(1.05); box-shadow: 0 8px 16px rgba(0,0,0,.18) !important; border-color: #FFCE00 !important; }
+    .token-wrong  { background: #fee2e2; border-color: #ef4444; color: #991b1b; }
+    .token-right  { background: #dcfce7; border-color: #22c55e; color: #166534; }
+
+    .build-slot {
+      min-height: 3.4rem;
+      border: 2px dashed #d4d4d4;
+      border-radius: 1rem;
+      background: #fafaf7;
+      padding: .55rem;
+      display: flex; flex-wrap: wrap; gap: .5rem;
+      align-items: center;
+      transition: border-color .15s ease, background .15s ease;
+    }
+    .pool-slot {
+      min-height: 2.4rem;
+      display: flex; flex-wrap: wrap; gap: .5rem;
+      padding: .25rem 0;
+    }
+
+    /* Fill-in inline inputs (Konjunktiv, Adjective, Praep, VerbPraep, ModalPerfekt, Relativ) */
+    .fill-input {
+      display: inline-block; vertical-align: baseline;
+      padding: .25rem .5rem; margin: 0 .15rem;
+      border: none; border-bottom: 2px solid #0b0b0b;
+      background: rgba(255,206,0,.18);
+      border-radius: .35rem .35rem 0 0;
+      font-weight: 600; font-size: 1.05rem; line-height: 1.5;
+      transition: background .15s ease, border-color .15s ease;
+    }
+    .fill-input:focus { background: rgba(255,206,0,.35); border-bottom-color: #DD0000; outline: none; }
+    .fill-input.right { background: #dcfce7; border-bottom-color: #22c55e; color: #166534; animation: greenPulse .8s ease-out; }
+    .fill-input.wrong { background: #fee2e2; border-bottom-color: #ef4444; color: #991b1b; animation: redShake .3s; }
+
+    /* haben/sein big buttons */
+    .hs-btn {
+      flex: 1; padding: 1.1rem 1rem;
+      border: 3px solid #0b0b0b; border-radius: 1rem;
+      background: white; font-weight: 800; font-size: 1.45rem;
+      transition: all .12s ease;
+      position: relative;
+    }
+    .hs-btn:hover { background: #f5f5f0; transform: translateY(-1px); }
+    .hs-btn .kbd {
+      position: absolute; top: .35rem; right: .55rem;
+      font-size: .65rem; font-weight: 700; color: #999;
+    }
+    .hs-btn.flash-correct { background: #dcfce7; border-color: #22c55e; color: #166534; }
+    .hs-btn.flash-wrong   { background: #fee2e2; border-color: #ef4444; color: #991b1b; }
+
+    /* Direction badges (PraepLokal) */
+    .dir-badge {
+      display: inline-block; font-weight: 700; font-size: .7rem;
+      padding: .3rem .65rem; border-radius: 9999px; letter-spacing: .04em; text-transform: uppercase;
+    }
+    .dir-badge.wo    { background: #dbeafe; color: #1e40af; }
+    .dir-badge.wohin { background: #d1fae5; color: #065f46; }
+    .dir-badge.woher { background: #ede9fe; color: #5b21b6; }
+
+    /* Verb chip (VerbPraep) */
+    .verb-chip {
+      display: inline-block; font-weight: 700; font-size: .9rem;
+      padding: .35rem .75rem; border-radius: 9999px;
+      background: #f3e8ff; color: #6b21a8; letter-spacing: .01em;
+    }
+
+    /* Sentence box for Relativsätze */
+    .sent-box {
+      background: white; border: 1.5px solid #e5e7eb; border-radius: .75rem;
+      padding: .65rem .85rem; font-size: .95rem; line-height: 1.5;
+    }
+
+    /* Slide-over panel */
+    @keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
+    @keyframes fadeInBg { from { opacity: 0; } to { opacity: 1; } }
+    .anim-slidein-right { animation: slideInRight .25s ease-out; }
+    .anim-bg-in { animation: fadeInBg .2s ease-out; }
+
+    /* Section disclosure chevron */
+    .chevron { display: inline-block; transition: transform .15s ease; }
+    .chevron.collapsed { transform: rotate(-90deg); }
+
+    /* Phrase chip (Redemittel) */
+    .phrase-chip {
+      display: inline-block; padding: .35rem .65rem; margin: .15rem;
+      background: #fef3c7; color: #78350f; border: 1px solid #fcd34d;
+      border-radius: .5rem; font-size: .85rem; cursor: pointer;
+      transition: all .12s ease; line-height: 1.35;
+    }
+    .phrase-chip:hover { background: #fde68a; transform: translateY(-1px); }
+    .phrase-chip:active { transform: scale(.97); }
+
+    /* Editor textarea */
+    .editor-textarea {
+      width: 100%; min-height: 16rem;
+      padding: .9rem 1rem; border-radius: 1rem;
+      border: 2px solid #e5e7eb; background: white;
+      font-size: 1rem; line-height: 1.6; resize: vertical;
+      transition: border-color .15s, background-color .3s;
+    }
+    .editor-textarea:focus { border-color: #0b0b0b; outline: none; }
+    .editor-textarea.flash { background-color: #fef3c7; }
+
+    /* Reference table cells */
+    .ref-cell { padding: .5rem .75rem; vertical-align: top; }
+
+    /* Page transitions (hub ↔ section) */
+    @keyframes pageInRight { from { transform: translateX(28px); opacity:0; } to { transform: translateX(0); opacity:1; } }
+    @keyframes pageInLeft  { from { transform: translateX(-28px); opacity:0; } to { transform: translateX(0); opacity:1; } }
+    .anim-page-fwd  { animation: pageInRight .25s ease-out; }
+    .anim-page-back { animation: pageInLeft  .25s ease-out; }
+
+    /* Hub card hover */
+    .hub-card { transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease; }
+    .hub-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,.06); }
+
+    /* Declension matrix cell */
+    .decl-row { transition: background-color .15s ease; }
+    .decl-cell { transition: transform .15s ease, box-shadow .15s ease; }
+    .decl-cell:hover { box-shadow: 0 6px 14px rgba(0,0,0,.06); }
+    .decl-pat-def  { background:#dbeafe; color:#1e3a8a; }
+    .decl-pat-zero { background:#fef3c7; color:#78350f; }
+    .decl-pat-ein  { background:#ede9fe; color:#5b21b6; }
+    .decl-pat-def-soft  { background:#eff6ff; }
+    .decl-pat-zero-soft { background:#fffbeb; }
+    .decl-pat-ein-soft  { background:#f5f3ff; }
+
+    /* Vorlesen view */
+    .vorlesen-text {
+      font-size: 1.5rem; line-height: 1.8; color: #f5f5f0;
+      max-width: 38rem; margin: 0 auto; white-space: pre-wrap;
+      font-family: ui-serif, Georgia, serif;
+    }
+  </style>
+</head>
+<body class="font-sans text-flag-ink">
+  <div class="flag-stripe h-1.5 w-full"></div>
+
+  <div id="app" class="max-w-2xl mx-auto px-4 pb-24"></div>
+
+  <div id="toast-host" class="fixed left-1/2 bottom-6 z-50 pointer-events-none"></div>
+  <div id="flash-host" class="fixed inset-0 pointer-events-none z-40"></div>
+
+  <script src="vocab_data.js"></script>
+  <script src="nebensatz_data.js"></script>
+  <script src="habensein_data.js"></script>
+  <script src="konjunktiv_data.js"></script>
+  <script src="adjective_data.js"></script>
+  <script src="praeposition_lokal_data.js"></script>
+  <script src="verb_praep_data.js"></script>
+  <script src="modal_perfekt_data.js"></script>
+  <script src="relativ_data.js"></script>
+  <script src="verb_position_ref.js"></script>
+  <script src="article_patterns_ref.js"></script>
+  <script src="declension_ref.js"></script>
+  <script src="schreiben_redemittel.js"></script>
+  <script src="sprechen_redemittel.js"></script>
+  <script>
+  // ============================================================
+  //  Storage
+  // ============================================================
+  const STATE_KEY = 'b1trainer_state';
+  const LEGACY_VOCAB_KEY = 'b1trainer_progress';
+  const SESSION_SIZE = 15;
+  const REVIEW_SIZE  = 20;
+  const BLITZ_SIZE   = 30;
+  const BLITZ_TIME   = 90 * 1000;
+  const MATURE_DAYS  = 21;
+
+  function emptyState() {
+    return {
+      vocab:{}, nebensatz:{}, habenSein:{}, konjunktiv:{},
+      adjective:{}, praepLokal:{}, verbPraep:{}, modalPerfekt:{}, relativ:{},
+      schreiben_drafts: { informal:null, formal:null, forum:null },
+      schreiben_vorlagen: { informal:[], formal:[], forum:[] },
+      sprechen_drafts: { planning:null, presentation:null },
+      sprechen_vorlagen: { planning:[], presentation:[] },
+      ui_prefs: { last_section: null, last_section_timestamp: 0 },
+      meta:{ lastSessionDate:null, streak:0, vorlagenSeeded:false },
+    };
+  }
+
+  function migrate() {
+    const raw = localStorage.getItem(STATE_KEY);
+    if (raw) {
+      // ensure new buckets present
+      try {
+        const p = JSON.parse(raw);
+        const fresh = emptyState();
+        let changed = false;
+        Object.keys(fresh).forEach(k => {
+          if (!p[k]) { p[k] = fresh[k]; changed = true; }
+        });
+        if (changed) localStorage.setItem(STATE_KEY, JSON.stringify(p));
+      } catch {}
+      return;
+    }
+    let vocab = {};
+    const old = localStorage.getItem(LEGACY_VOCAB_KEY);
+    if (old) {
+      try {
+        const parsed = JSON.parse(old);
+        if (parsed && typeof parsed === 'object') vocab = parsed;
+      } catch {}
+    }
+    const fresh = emptyState();
+    fresh.vocab = vocab;
+    localStorage.setItem(STATE_KEY, JSON.stringify(fresh));
+  }
+
+  function loadState() {
+    try {
+      const p = JSON.parse(localStorage.getItem(STATE_KEY) || '{}');
+      const base = emptyState();
+      return { ...base, ...p, meta: { ...base.meta, ...(p.meta || {}) } };
+    } catch { return emptyState(); }
+  }
+  function saveState(s) { localStorage.setItem(STATE_KEY, JSON.stringify(s)); }
+
+  function defaultCardState() { return { interval:0, ease:2.5, due:0, reps:0, lapses:0 }; }
+  function getItemState(type, key) {
+    const s = loadState();
+    return (s[type] || {})[key] || defaultCardState();
+  }
+  function setItemState(type, key, st) {
+    const s = loadState();
+    if (!s[type]) s[type] = {};
+    s[type][key] = st;
+    saveState(s);
+  }
+  function getMeta() { return loadState().meta; }
+  function setMeta(m) { const s = loadState(); s.meta = m; saveState(s); }
+  function clearAllProgress() {
+    localStorage.removeItem(STATE_KEY);
+    localStorage.removeItem(LEGACY_VOCAB_KEY);
+    migrate();
+    seedSampleVorlagen();
+  }
+
+  // ---- UI prefs (last-visited section + timestamp) ----
+  function getUIPrefs() { return loadState().ui_prefs || { last_section: null, last_section_timestamp: 0 }; }
+  function setUIPrefs(p) { const s = loadState(); s.ui_prefs = p; saveState(s); }
+  const LAST_SECTION_TTL = 30 * 60 * 1000;
+  const SECTION_VIEWS = ['hub','section-vokabeln','section-grammatik','section-editors','section-referenz'];
+  function isSectionView(v) { return SECTION_VIEWS.includes(v); }
+  function recordLastSection(view) {
+    if (!isSectionView(view)) return;
+    const p = getUIPrefs();
+    p.last_section = view;
+    p.last_section_timestamp = Date.now();
+    setUIPrefs(p);
+  }
+  function bootView() {
+    const p = getUIPrefs();
+    const ts = p.last_section_timestamp || 0;
+    if (p.last_section && isSectionView(p.last_section) && (Date.now() - ts) < LAST_SECTION_TTL) {
+      return p.last_section;
+    }
+    return 'hub';
+  }
+
+  // ---- Editor drafts ----
+  function getDraft(area, taskId) {
+    const s = loadState();
+    const bucket = area === 'schreiben' ? s.schreiben_drafts : s.sprechen_drafts;
+    return (bucket && bucket[taskId]) || null;
+  }
+  function setDraft(area, taskId, data) {
+    const s = loadState();
+    const bucketKey = area === 'schreiben' ? 'schreiben_drafts' : 'sprechen_drafts';
+    if (!s[bucketKey]) s[bucketKey] = {};
+    s[bucketKey][taskId] = { ...data, lastSaved: Date.now() };
+    saveState(s);
+  }
+
+  // ---- Vorlagen ----
+  function listVorlagen(area, taskId) {
+    const s = loadState();
+    const bucketKey = area === 'schreiben' ? 'schreiben_vorlagen' : 'sprechen_vorlagen';
+    return (s[bucketKey] && s[bucketKey][taskId]) || [];
+  }
+  function saveVorlage(area, taskId, vorlage) {
+    const s = loadState();
+    const bucketKey = area === 'schreiben' ? 'schreiben_vorlagen' : 'sprechen_vorlagen';
+    if (!s[bucketKey]) s[bucketKey] = {};
+    if (!s[bucketKey][taskId]) s[bucketKey][taskId] = [];
+    const id = vorlage.id || ('v_' + Date.now() + '_' + Math.random().toString(36).slice(2,7));
+    const entry = { id, name: vorlage.name, body: vorlage.body, savedAt: Date.now(), isExample: !!vorlage.isExample };
+    s[bucketKey][taskId].push(entry);
+    saveState(s);
+    return entry;
+  }
+  function deleteVorlage(area, taskId, id) {
+    const s = loadState();
+    const bucketKey = area === 'schreiben' ? 'schreiben_vorlagen' : 'sprechen_vorlagen';
+    const arr = (s[bucketKey] && s[bucketKey][taskId]) || [];
+    s[bucketKey][taskId] = arr.filter(v => v.id !== id || v.isExample);
+    saveState(s);
+  }
+
+  // ---- Sample Vorlagen seeding ----
+  const SAMPLE_VORLAGEN = {
+    schreiben: {
+      informal: {
+        name: 'Beispiel: Antwort auf Geburtstagseinladung',
+        body: `Liebe Maria,
+
+vielen Dank für die Einladung zu deinem Geburtstag! Ich freue mich sehr, dass du an mich gedacht hast.
+
+Leider kann ich am Samstag nicht kommen, weil ich an diesem Wochenende nach Hamburg fahre. Meine Schwester gibt dort ein Konzert und ich habe ihr versprochen, sie zu besuchen. Es tut mir wirklich leid!
+
+Aber ich würde dich gern ein anderes Mal sehen. Hast du Lust auf ein Treffen am Mittwoch nach der Arbeit? Wir könnten zusammen Pizza essen, und ich bringe dir dann auch dein Geschenk mit.
+
+Schreib mir bitte, ob das für dich passt.
+
+Liebe Grüße,
+Eric`,
+      },
+      formal: {
+        name: 'Beispiel: Anfrage zu einem Sprachkurs',
+        body: `Sehr geehrte Damen und Herren,
+
+mit großem Interesse habe ich Ihre Anzeige für den Deutschkurs B2 gelesen. Ich schreibe Ihnen, weil ich mich für den Kurs anmelden möchte.
+
+Ich lerne seit einem Jahr Deutsch und möchte meine Kenntnisse weiter verbessern, denn ich plane, in Deutschland zu studieren.
+
+Ich würde gerne wissen, wann der Kurs beginnt und wie viel er kostet. Außerdem bitte ich Sie, mir den genauen Stundenplan zu schicken. Wäre es auch möglich, einen Probetag zu vereinbaren?
+
+Über eine baldige Rückmeldung würde ich mich sehr freuen.
+
+Mit freundlichen Grüßen,
+Eric Pintos`,
+      },
+      forum: {
+        name: 'Beispiel: Smartphones in der Schule',
+        body: `Über das Thema Smartphones in der Schule wird heutzutage viel diskutiert. Meiner Meinung nach sollten Schüler Smartphones in der Schule nutzen dürfen, aber nur unter klaren Regeln.
+
+Auf der einen Seite sind Smartphones nützlich, weil man schnell Informationen finden kann. Außerdem können Schüler in der Pause mit ihren Eltern Kontakt halten. Ein weiterer Vorteil ist, dass viele Apps beim Lernen helfen.
+
+Auf der anderen Seite gibt es auch Nachteile. Smartphones lenken oft vom Unterricht ab, und manche Schüler benutzen sie für soziale Medien statt für die Schule. Allerdings denke ich, dass das eher eine Frage der Disziplin ist.
+
+Zusammenfassend bin ich der Meinung, dass Smartphones im Unterricht erlaubt sein sollten, aber nur für schulische Zwecke.`,
+      },
+    },
+    sprechen: {
+      planning: {
+        name: 'Beispiel: Kinobesuch planen',
+        body: `Szenario: Sie wollen mit Ihrem Freund ins Kino gehen.
+
+A: Hallo! Hast du Lust, am Wochenende mit mir ins Kino zu gehen?
+B: Das ist eine super Idee! Welchen Film möchtest du denn sehen?
+A: Es läuft ein neuer Krimi am Freitag. Wie wäre es mit der 19-Uhr-Vorstellung?
+B: Freitag um 19 Uhr passt mir leider nicht, weil ich noch arbeite. Hättest du am Samstag Zeit?
+A: Samstag passt mir auch sehr gut. Wie sieht es um 17 Uhr aus?
+B: Perfekt! Wo treffen wir uns?
+A: Direkt vor dem Kino am Hauptbahnhof, fünf Minuten vor Beginn.
+B: Einverstanden. Soll ich die Tickets schon online kaufen?
+A: Ja gern, das wäre super. Ich überweise dir das Geld dann.
+B: Alles klar, dann sehen wir uns am Samstag um 16:55!
+A: Bis Samstag, ich freue mich!`,
+      },
+      presentation: {
+        name: 'Beispiel: Soziale Medien im Alltag',
+        body: 'PRESENTATION_PLACEHOLDER', // we'll store slides separately
+        slides: [
+          'In meiner Präsentation werde ich heute über soziale Medien im Alltag sprechen. Zuerst werde ich meine eigenen Erfahrungen besprechen, dann über die Situation in meinem Heimatland berichten. Danach werde ich Vor- und Nachteile analysieren, und schließlich werde ich meine Meinung dazu sagen.',
+          'Ich persönlich nutze soziale Medien jeden Tag, vor allem Instagram und WhatsApp. In meinem Alltag schaue ich oft am Morgen kurz auf mein Handy, um Nachrichten von Freunden zu lesen. Letztes Jahr habe ich mehr als zwei Stunden pro Tag dort verbracht — das war einfach zu viel.',
+          'In meinem Heimatland ist Facebook noch sehr populär, anders als in Deutschland, wo Instagram dominiert. Bei uns benutzen auch ältere Menschen soziale Medien, um mit ihrer Familie im Ausland zu kommunizieren. Im Vergleich zu Deutschland ist die Nutzung also breiter.',
+          'Auf der einen Seite verbinden soziale Medien Menschen über große Entfernungen. Ein Vorteil ist, dass man schnell Informationen teilen kann. Auf der anderen Seite gibt es Probleme: viele Menschen vergleichen sich ständig mit anderen und werden unglücklich. Außerdem kann man viel Zeit verlieren.',
+          'Zusammenfassend denke ich, dass soziale Medien nützlich, aber auch gefährlich sein können. Man muss sie bewusst nutzen. Vielen Dank fürs Zuhören. Habt ihr noch Fragen?',
+        ],
+        topic: 'Soziale Medien im Alltag',
+      },
+    },
+  };
+
+  function seedSampleVorlagen() {
+    const s = loadState();
+    if (s.meta && s.meta.vorlagenSeeded) return;
+    ['informal','formal','forum'].forEach(taskId => {
+      const tpl = SAMPLE_VORLAGEN.schreiben[taskId];
+      if (!tpl) return;
+      if (!s.schreiben_vorlagen[taskId]) s.schreiben_vorlagen[taskId] = [];
+      const exists = s.schreiben_vorlagen[taskId].some(v => v.isExample);
+      if (!exists) {
+        s.schreiben_vorlagen[taskId].push({
+          id: 'sample_' + taskId, name: tpl.name, body: tpl.body,
+          savedAt: Date.now(), isExample: true,
+        });
+      }
+    });
+    ['planning','presentation'].forEach(taskId => {
+      const tpl = SAMPLE_VORLAGEN.sprechen[taskId];
+      if (!tpl) return;
+      if (!s.sprechen_vorlagen[taskId]) s.sprechen_vorlagen[taskId] = [];
+      const exists = s.sprechen_vorlagen[taskId].some(v => v.isExample);
+      if (!exists) {
+        const entry = {
+          id: 'sample_' + taskId, name: tpl.name,
+          body: tpl.body, savedAt: Date.now(), isExample: true,
+        };
+        if (tpl.slides) entry.slides = tpl.slides;
+        if (tpl.topic) entry.topic = tpl.topic;
+        s.sprechen_vorlagen[taskId].push(entry);
+      }
+    });
+    s.meta = { ...(s.meta || {}), vorlagenSeeded: true };
+    saveState(s);
+  }
+
+  // ============================================================
+  //  SR (SM-2 lite)
+  // ============================================================
+  function applyGrade(state, grade) {
+    const s = { ...state };
+    if (grade === 'wrong') {
+      s.interval = 0; s.ease = Math.max(1.3, s.ease - 0.2); s.lapses += 1;
+    } else if (grade === 'wrong-hard') {
+      s.interval = 0; s.ease = Math.max(1.3, s.ease - 0.25); s.lapses += 1;
+    } else if (grade === 'partial') {
+      s.interval = Math.max(1, Math.floor(s.interval * 0.5));
+      s.ease = Math.max(1.3, s.ease - 0.15);
+    } else if (grade === 'partial-konj') {
+      s.interval = Math.max(1, Math.floor(s.interval * 0.4));
+      s.ease = Math.max(1.3, s.ease - 0.15);
+    } else if (grade === 'partial-modal') {
+      s.interval = Math.max(1, Math.floor(s.interval * 0.3));
+      s.ease = Math.max(1.3, s.ease - 0.2);
+      s.lapses += 1;
+    } else if (grade === 'correct') {
+      if (s.reps === 0) s.interval = 1;
+      else if (s.reps === 1) s.interval = 3;
+      else s.interval = Math.round(s.interval * s.ease);
+    } else if (grade === 'easy') {
+      let base;
+      if (s.reps === 0) base = 1;
+      else if (s.reps === 1) base = 3;
+      else base = Math.round(s.interval * s.ease);
+      s.interval = Math.max(1, Math.round(base * 1.3));
+    }
+    s.ease = Math.min(2.8, Math.max(1.3, s.ease));
+    s.reps += 1;
+    s.due = s.interval === 0 ? 0 : Date.now() + s.interval * 86400000;
+    return s;
+  }
+  function isDue(state) { return state.reps === 0 || state.due <= Date.now(); }
+
+  // ============================================================
+  //  Streak / day tracking
+  // ============================================================
+  function dateKey(d) {
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  }
+  function todayStr() { return dateKey(new Date()); }
+  function yesterdayStr() {
+    const d = new Date(); d.setDate(d.getDate()-1);
+    return dateKey(d);
+  }
+  function recordSessionDay() {
+    const meta = getMeta();
+    const today = todayStr();
+    if (meta.lastSessionDate === today) return;
+    if (meta.lastSessionDate === yesterdayStr()) meta.streak = (meta.streak || 0) + 1;
+    else meta.streak = 1;
+    meta.lastSessionDate = today;
+    setMeta(meta);
+  }
+
+  // ============================================================
+  //  Normalization
+  // ============================================================
+  function normalize(s) {
+    if (s == null) return '';
+    return String(s)
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, ' ')
+      .replace(/…/g, '...')
+      .replace(/ae/g, 'ä')
+      .replace(/oe/g, 'ö')
+      .replace(/ue/g, 'ü')
+      .replace(/ss/g, 'ß');
+  }
+  function stripArticlePrefix(s) {
+    return (s || '').replace(/^\s*(der|die|das)\s+/i, '');
+  }
+  function splitScaffold(s) {
+    return String(s || '').split(/_{2,}/);
+  }
+
+  // ============================================================
+  //  Module configuration
+  // ============================================================
+  // kind: card.kind / session.type for grammar drills
+  // type: localStorage namespace
+  const GRAMMAR_MODULES = [
+    { kind:'nebensatz',    type:'nebensatz',    label:'Nebensatz',           sub:'Drag verbs to the end of the clause.', accent:'text-flag-red',     btn:'Drill word order',    action:'start-grammar' },
+    { kind:'habensein',    type:'habenSein',    label:'haben vs. sein',      sub:'Pick the right Perfekt-auxiliary.',     accent:'text-flag-ink',     btn:'Practice / Blitz',    action:'open-habensein' },
+    { kind:'konjunktiv',   type:'konjunktiv',   label:'Konjunktiv II',       sub:'Hätte, wäre, würde + infinitive.',     accent:'text-amber-700',    btn:'Drill wenn-clauses',  action:'start-grammar' },
+    { kind:'adjective',    type:'adjective',    label:'Adjektiv-Endungen',   sub:'Tabelle 1 · 2 · gemischt.',            accent:'text-emerald-700',  btn:'Drill endings',       action:'start-grammar' },
+    { kind:'praepLokal',   type:'praepLokal',   label:'Präpositionen lokal', sub:'Wo? Wohin? Woher?',                    accent:'text-blue-700',     btn:'Drill prepositions',  action:'start-grammar' },
+    { kind:'verbPraep',    type:'verbPraep',    label:'Verb + Präposition',  sub:'denken an, warten auf …',              accent:'text-purple-700',   btn:'Drill pairings',      action:'start-grammar' },
+    { kind:'modalPerfekt', type:'modalPerfekt', label:'Modal · Perfekt',     sub:'Doppelinfinitiv-Pattern.',             accent:'text-rose-700',     btn:'Drill double-inf',    action:'start-grammar' },
+    { kind:'relativ',      type:'relativ',      label:'Relativsätze',        sub:'der/die/das · dessen/deren.',          accent:'text-indigo-700',   btn:'Drill rel. pronouns', action:'start-grammar' },
+  ];
+  function moduleByKind(kind) { return GRAMMAR_MODULES.find(m => m.kind === kind); }
+  function moduleItems(kind) {
+    switch (kind) {
+      case 'nebensatz':    return NEBENSATZ_ITEMS;
+      case 'habensein':    return HABEN_SEIN_ITEMS;
+      case 'konjunktiv':   return KONJUNKTIV_ITEMS;
+      case 'adjective':    return ADJECTIVE_ITEMS;
+      case 'praepLokal':   return PRAEPOSITION_LOKAL_ITEMS;
+      case 'verbPraep':    return VERB_PRAEP_ITEMS;
+      case 'modalPerfekt': return MODAL_PERFEKT_ITEMS;
+      case 'relativ':      return RELATIV_ITEMS;
+      default: return [];
+    }
+  }
+  function kindToType(kind) {
+    if (kind === 'habensein') return 'habenSein';
+    return kind;
+  }
+  function itemKey(kind, item) {
+    return kind === 'vocab' ? item.german : item.id;
+  }
+
+  const SUBJECT_FORMS = {
+    'ich':       ['habe', 'bin'],
+    'du':        ['hast', 'bist'],
+    'er/sie/es': ['hat', 'ist'],
+    'wir':       ['haben', 'sind'],
+    'ihr':       ['habt', 'seid'],
+    'sie/Sie':   ['haben', 'sind'],
+  };
+  // Sanity-check habensein answers map to forms
+  HABEN_SEIN_ITEMS.forEach(it => {
+    const f = SUBJECT_FORMS[it.subject_form];
+    if (!f || !f.includes(it.answer)) console.warn('habensein answer mismatch', it.id);
+  });
+
+  // ============================================================
+  //  Stats helpers
+  // ============================================================
+  function moduleStats(type, items, keyFn) {
+    keyFn = keyFn || ((it) => it.id);
+    const total = items.length;
+    let seen = 0, due = 0, totalReps = 0, totalLapses = 0, strengthSum = 0;
+    items.forEach(it => {
+      const s = getItemState(type, keyFn(it));
+      if (s.reps > 0) seen++;
+      if (s.reps > 0 && s.due <= Date.now()) due++;
+      totalReps   += s.reps;
+      totalLapses += s.lapses;
+      strengthSum += Math.min(s.interval / MATURE_DAYS, 1);
+    });
+    return {
+      total, seen, due,
+      seenPct: total ? Math.round(seen / total * 100) : 0,
+      strength: total ? Math.round(strengthSum / total * 100) : 0,
+      accuracy: totalReps > 0 ? Math.round((totalReps - totalLapses) / totalReps * 100) : null,
+    };
+  }
+  function vocabLessonStats(lesson) {
+    return moduleStats('vocab', lesson.words, (w) => w.german);
+  }
+  function totalDueCount() {
+    let n = 0;
+    LESSONS.forEach(l => l.words.forEach(w => {
+      const s = getItemState('vocab', w.german);
+      if (s.reps > 0 && s.due <= Date.now()) n++;
+    }));
+    GRAMMAR_MODULES.forEach(m => {
+      moduleItems(m.kind).forEach(it => {
+        const s = getItemState(m.type, it.id);
+        if (s.reps > 0 && s.due <= Date.now()) n++;
+      });
+    });
+    return n;
+  }
+  function totalSeenCount() {
+    let n = 0;
+    LESSONS.forEach(l => l.words.forEach(w => { if (getItemState('vocab', w.german).reps > 0) n++; }));
+    GRAMMAR_MODULES.forEach(m => {
+      moduleItems(m.kind).forEach(it => { if (getItemState(m.type, it.id).reps > 0) n++; });
+    });
+    return n;
+  }
+
+  // ============================================================
+  //  Selection
+  // ============================================================
+  function pickVocabSession(lesson, size = SESSION_SIZE) {
+    const cards = lesson.words.map(w => ({ kind:'vocab', item:w, lesson, state:getItemState('vocab', w.german) }));
+    const news = cards.filter(c => c.state.reps === 0);
+    const due  = cards.filter(c => c.state.reps > 0 && c.state.due <= Date.now()).sort((a,b) => a.state.due - b.state.due);
+    const fut  = cards.filter(c => c.state.reps > 0 && c.state.due >  Date.now()).sort((a,b) => a.state.due - b.state.due);
+    return [...news, ...due, ...fut].slice(0, size);
+  }
+  function pickGrammarSession(kind, size = SESSION_SIZE) {
+    const m = moduleByKind(kind);
+    const items = moduleItems(kind);
+    const cards = items.map(it => ({ kind, item:it, state:getItemState(m.type, it.id) }));
+    const news = cards.filter(c => c.state.reps === 0);
+    const due  = cards.filter(c => c.state.reps > 0 && c.state.due <= Date.now()).sort((a,b) => a.state.due - b.state.due);
+    const fut  = cards.filter(c => c.state.reps > 0 && c.state.due >  Date.now()).sort((a,b) => a.state.due - b.state.due);
+    return [...news, ...due, ...fut].slice(0, size);
+  }
+  function pickMixedReview(size = REVIEW_SIZE) {
+    const cards = [];
+    LESSONS.forEach(lesson => lesson.words.forEach(w => {
+      const st = getItemState('vocab', w.german);
+      if (st.reps > 0 && st.due <= Date.now()) cards.push({ kind:'vocab', item:w, lesson, state:st });
+    }));
+    GRAMMAR_MODULES.forEach(m => {
+      moduleItems(m.kind).forEach(it => {
+        const st = getItemState(m.type, it.id);
+        if (st.reps > 0 && st.due <= Date.now()) cards.push({ kind:m.kind, item:it, state:st });
+      });
+    });
+    cards.sort((a,b) => a.state.due - b.state.due);
+    return cards.slice(0, size);
+  }
+  function dueRemainingForSession(s) {
+    if (s.type === 'mixed-review') return Math.max(0, totalDueCount() - s.idx);
+    if (s.type === 'vocab-learn' || s.type === 'vocab-drill') {
+      const lesson = LESSONS[s.lessonIdx];
+      return Math.max(0, lesson.words.length - s.idx);
+    }
+    if (s.type === 'habensein-blitz') return 0;
+    if (s.type === 'habensein-practice') return Math.max(0, HABEN_SEIN_ITEMS.length - s.idx);
+    const items = moduleItems(s.type);
+    return items.length ? Math.max(0, items.length - s.idx) : 0;
+  }
+
+  // ============================================================
+  //  App state
+  // ============================================================
+  const state = {
+    view: 'hub',     // 'dashboard'|'session'|'habensein-mode'|'blitz-results'|'reset-confirm'
+                            // |'reference-verb'|'reference-article'
+                            // |'schreiben-home'|'schreiben-editor'
+                            // |'sprechen-home'|'sprechen-editor'|'vorlesen'
+    session: null,
+    cardPhase: 'question',
+    feedback: null,
+    draft: {},
+    overlay: null,         // 'verb-position' | 'article-patterns' | { type:'vorlagen', area, taskId } | null
+    editor: null,          // { area, taskId, ... }
+  };
+  let editorSaveTimer = null;
+
+  // ============================================================
+  //  Helpers
+  // ============================================================
+  function escapeHtml(s) {
+    return (s == null ? '' : String(s)).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  function articleClass(article) {
+    if (article === 'der') return 'article-tag-der';
+    if (article === 'die') return 'article-tag-die';
+    if (article === 'das') return 'article-tag-das';
+    return 'bg-neutral-200 text-neutral-700';
+  }
+  function posLabel(pos) {
+    return ({noun:'Noun',verb:'Verb',adj:'Adjective',adv:'Adverb',conj:'Conjunction',phrase:'Phrase'})[pos] || pos;
+  }
+  function showToast(text, ms = 2400) {
+    const host = document.getElementById('toast-host');
+    host.innerHTML = '';
+    const el = document.createElement('div');
+    el.className = 'anim-toast pointer-events-auto bg-flag-ink text-white rounded-full px-5 py-3 shadow-lg text-sm font-medium';
+    el.textContent = text;
+    host.appendChild(el);
+    setTimeout(() => { el.style.transition = 'opacity .3s'; el.style.opacity = '0'; }, ms);
+    setTimeout(() => { host.innerHTML = ''; }, ms + 400);
+  }
+  function flashScreen(color) {
+    const h = document.getElementById('flash-host');
+    h.innerHTML = '';
+    const el = document.createElement('div');
+    const tint = color === 'green' ? 'rgba(34,197,94,.22)' : 'rgba(239,68,68,.22)';
+    el.style.cssText = `position:absolute;inset:0;background:${tint};`;
+    el.className = 'anim-flash';
+    h.appendChild(el);
+    setTimeout(() => { h.innerHTML = ''; }, 260);
+  }
+
+  // ============================================================
+  //  Renderers — Dashboard
+  // ============================================================
+  function renderHeader() {
+    const meta = getMeta();
+    const dueAll = totalDueCount();
+    const seen = totalSeenCount();
+    const streak = meta.streak || 0;
+    const today = todayStr();
+    const live = meta.lastSessionDate === today;
+
+    return `
+      <header class="pt-6 pb-3">
+        <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">B1 Deutsch Trainer</h1>
+        <div class="mt-2 text-xs text-neutral-600 flex flex-wrap gap-x-3 gap-y-1">
+          <span><strong class="text-flag-ink">${seen}</strong> items seen</span>
+          <span class="text-neutral-300">•</span>
+          <span><strong class="text-flag-red">${dueAll}</strong> due now</span>
+          <span class="text-neutral-300">•</span>
+          <span class="${live ? 'text-amber-700 font-semibold' : ''}">
+            ${streak > 0 ? `<strong class="text-flag-ink">${streak}</strong>-day streak${live ? ' · today ✓' : ''}` : 'no streak yet'}
+          </span>
+        </div>
+      </header>
+    `;
+  }
+
+  // Helpers for hub stats
+  function totalVocabSeenPct() {
+    const total = LESSONS.reduce((n, l) => n + l.words.length, 0);
+    let seen = 0;
+    LESSONS.forEach(l => l.words.forEach(w => { if (getItemState('vocab', w.german).reps > 0) seen++; }));
+    return total ? Math.round(seen / total * 100) : 0;
+  }
+  function totalGrammarSeenPct() {
+    let total = 0, seen = 0;
+    GRAMMAR_MODULES.forEach(m => {
+      const items = moduleItems(m.kind);
+      total += items.length;
+      items.forEach(it => { if (getItemState(m.type, it.id).reps > 0) seen++; });
+    });
+    return total ? Math.round(seen / total * 100) : 0;
+  }
+  function totalVorlagenCount() {
+    const s = loadState();
+    let n = 0;
+    ['informal','formal','forum'].forEach(t => { n += (s.schreiben_vorlagen[t] || []).length; });
+    ['planning','presentation'].forEach(t => { n += (s.sprechen_vorlagen[t] || []).length; });
+    return n;
+  }
+
+  function pageAnim() {
+    return state.navDir === 'back' ? 'anim-page-back' : 'anim-page-fwd';
+  }
+
+  function renderHub() {
+    const dueAll = totalDueCount();
+    const vPct = totalVocabSeenPct();
+    const gPct = totalGrammarSeenPct();
+    const vorl = totalVorlagenCount();
+
+    const dueHero = dueAll > 0 ? `
+      <button data-action="start-mixed"
+              class="w-full text-left rounded-2xl bg-flag-ink text-white px-5 py-5 shadow-sm hover:shadow-md transition flex items-center gap-4 mb-6">
+        <div class="flex-1">
+          <div class="text-xs uppercase tracking-wider text-flag-gold font-semibold mb-1">Due today · alle Module</div>
+          <div class="text-3xl font-extrabold">${dueAll} card${dueAll === 1 ? '' : 's'}</div>
+          <div class="text-sm text-neutral-300 mt-1">Mixed review across vocab + grammar →</div>
+        </div>
+        <div class="rounded-full bg-flag-red w-12 h-12 flex items-center justify-center text-2xl font-bold shadow">→</div>
+      </button>
+    ` : `
+      <div class="w-full rounded-2xl bg-white border border-neutral-200 px-5 py-5 mb-6">
+        <div class="text-xs uppercase tracking-wider text-neutral-400 font-semibold mb-1">Due today</div>
+        <div class="text-2xl font-extrabold text-neutral-700">All caught up ✓</div>
+        <div class="text-sm text-neutral-500 mt-1">Wähle einen Bereich unten.</div>
+      </div>
+    `;
+
+    const card = (kind, icon, label, sub, accent) => `
+      <button data-action="open-section" data-section="${kind}"
+              class="hub-card text-left rounded-2xl bg-white border border-neutral-200 hover:border-${accent}-300 p-6 flex items-center gap-5 min-h-[7.5rem]">
+        <div class="text-4xl shrink-0 leading-none">${icon}</div>
+        <div class="flex-1 min-w-0">
+          <h2 class="text-xl sm:text-2xl font-extrabold tracking-tight">${escapeHtml(label)}</h2>
+          <div class="text-sm text-neutral-600 mt-1">${escapeHtml(sub)}</div>
+        </div>
+        <div class="text-2xl text-neutral-300 shrink-0">→</div>
+      </button>
+    `;
+
+    const cards = `
+      <div class="flex flex-col gap-3">
+        ${card('section-vokabeln',   '📚', 'Vokabeln',                 `${LESSONS.length} Lektionen · ${vPct}% gesehen`, 'flag-red')}
+        ${card('section-grammatik',  '🧱', 'Grammatik',                `${GRAMMAR_MODULES.length} Module · ${gPct}% gesehen`, 'amber')}
+        ${card('section-editors',    '✍️', 'Schreiben & Sprechen',     `2 Editoren · ${vorl} gespeicherte Vorlagen`, 'emerald')}
+        ${card('section-referenz',   '📖', 'Referenz',                 `3 Karten zum Nachschlagen`, 'indigo')}
+      </div>
+    `;
+
+    const footer = `
+      <div class="text-center mt-8 space-y-2">
+        <div class="flex justify-center gap-3 text-xs">
+          <button data-action="export-vorlagen" class="text-neutral-400 hover:text-flag-ink underline underline-offset-2">Export Vorlagen (Markdown)</button>
+          <span class="text-neutral-300">·</span>
+          <button data-action="confirm-reset" class="text-neutral-400 hover:text-flag-red underline underline-offset-2">Reset all progress</button>
+        </div>
+        <p class="text-[11px] text-neutral-400">Progress saved locally · single device</p>
+      </div>
+    `;
+
+    return renderHeader() + `<div class="${pageAnim()}">` + dueHero + cards + footer + `</div>`;
+  }
+
+  function renderSectionHeader(title, subtitle) {
+    return `
+      <header class="pt-5 pb-4">
+        <div class="flex items-center gap-3">
+          <button data-action="back-to-hub"
+                  class="rounded-full w-9 h-9 flex items-center justify-center bg-white border border-neutral-200 hover:bg-neutral-50 transition" aria-label="Übersicht">
+            <span class="text-lg leading-none">←</span>
+          </button>
+          <div>
+            <div class="text-[11px] text-neutral-500 uppercase tracking-wider font-semibold">Übersicht</div>
+            <div class="text-lg font-extrabold tracking-tight">${escapeHtml(title)}</div>
+            ${subtitle ? `<div class="text-xs text-neutral-500">${escapeHtml(subtitle)}</div>` : ''}
+          </div>
+        </div>
+      </header>
+    `;
+  }
+
+  function renderSectionVokabeln() {
+    const grid = `
+      <div class="grid gap-3 sm:grid-cols-2">
+        ${LESSONS.map((lesson, idx) => {
+          const stats = vocabLessonStats(lesson);
+          return `
+            <div class="rounded-2xl bg-white border border-neutral-200 p-4 hover:border-neutral-300 transition">
+              <div class="flex items-start justify-between mb-2">
+                <div class="min-w-0">
+                  <div class="text-xs text-neutral-400 font-medium">Lektion ${lesson.lesson}</div>
+                  <div class="font-bold text-base leading-snug truncate">${escapeHtml(lesson.title)}</div>
+                </div>
+                ${stats.due > 0 ? `<span class="shrink-0 ml-2 text-xs font-bold bg-flag-red text-white rounded-full px-2 py-0.5">${stats.due} due</span>` : ''}
+              </div>
+              <div class="h-2 bg-neutral-100 rounded-full overflow-hidden mb-1">
+                <div class="h-full bg-flag-ink progress-bar" style="width:${stats.strength}%"></div>
+              </div>
+              <div class="text-[11px] text-neutral-500 mb-3">${stats.seen}/${stats.total} seen${stats.accuracy != null ? ` · ${stats.accuracy}% acc` : ''}</div>
+              <div class="flex gap-2">
+                <button data-action="start-learn" data-lesson="${idx}"
+                        class="flex-1 py-2 rounded-xl bg-flag-gold text-flag-ink font-bold hover:brightness-95 transition">Learn</button>
+                <button data-action="start-drill" data-lesson="${idx}"
+                        class="flex-1 py-2 rounded-xl bg-flag-ink text-white font-bold hover:bg-neutral-800 transition">Drill</button>
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+    return renderSectionHeader('Vokabeln', `${LESSONS.length} Lektionen`)
+         + `<main class="${pageAnim()}">${grid}</main>`;
+  }
+
+  function renderSectionGrammatik() {
+    const grid = `
+      <div class="grid gap-3 sm:grid-cols-2">
+        ${GRAMMAR_MODULES.map(m => {
+          const stats = moduleStats(m.type, moduleItems(m.kind));
+          return `
+            <div class="rounded-2xl bg-white border border-neutral-200 p-4 hover:border-neutral-300 transition">
+              <div class="flex items-start justify-between mb-2">
+                <div class="min-w-0">
+                  <div class="text-[11px] uppercase tracking-wider font-bold ${m.accent}">${escapeHtml(m.label)}</div>
+                  <div class="text-sm text-neutral-600 leading-snug">${escapeHtml(m.sub)}</div>
+                </div>
+                ${stats.due > 0 ? `<span class="shrink-0 ml-2 text-xs font-bold bg-flag-red text-white rounded-full px-2 py-0.5">${stats.due} due</span>` : ''}
+              </div>
+              <div class="h-2 bg-neutral-100 rounded-full overflow-hidden mb-1">
+                <div class="h-full bg-flag-ink progress-bar" style="width:${stats.strength}%"></div>
+              </div>
+              <div class="text-[11px] text-neutral-500 mb-3">${stats.seen}/${stats.total} seen${stats.accuracy != null ? ` · ${stats.accuracy}% acc` : ''}</div>
+              <button data-action="${m.action}" data-kind="${m.kind}"
+                      class="w-full py-2 rounded-xl bg-flag-ink text-white font-bold hover:bg-neutral-800 transition">${escapeHtml(m.btn)}</button>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+    return renderSectionHeader('Grammatik', `${GRAMMAR_MODULES.length} Module`)
+         + `<main class="${pageAnim()}">${grid}</main>`;
+  }
+
+  function renderSectionEditors() {
+    const schreibenCards = SCHREIBEN_REDEMITTEL.map(t => {
+      const list = listVorlagen('schreiben', t.id);
+      const examples = list.filter(v => v.isExample).length;
+      const own = list.length - examples;
+      return `
+        <button data-action="open-editor" data-area="schreiben" data-task="${t.id}"
+                class="text-left rounded-2xl bg-white border border-neutral-200 hover:border-emerald-400 transition p-4 w-full">
+          <div class="flex items-baseline gap-2 mb-1">
+            <span class="text-xl">${escapeHtml(t.icon)}</span>
+            <div class="font-extrabold text-sm">${escapeHtml(t.title)}</div>
+          </div>
+          <div class="text-xs text-neutral-500 mb-2">${escapeHtml(t.subtitle)}</div>
+          <div class="text-[11px] text-neutral-500"><strong>${list.length}</strong> Vorlagen${examples > 0 ? ` · ${examples} Beispiel${examples>1?'e':''}` : ''}${own > 0 ? ` · ${own} eigene` : ''}</div>
+        </button>`;
+    }).join('');
+
+    const sprechenCards = SPRECHEN_REDEMITTEL.map(t => {
+      const list = listVorlagen('sprechen', t.id);
+      const examples = list.filter(v => v.isExample).length;
+      const own = list.length - examples;
+      return `
+        <button data-action="open-editor" data-area="sprechen" data-task="${t.id}"
+                class="text-left rounded-2xl bg-white border border-neutral-200 hover:border-blue-400 transition p-4 w-full">
+          <div class="flex items-baseline gap-2 mb-1">
+            <span class="text-xl">${escapeHtml(t.icon)}</span>
+            <div class="font-extrabold text-sm">${escapeHtml(t.title)}</div>
+          </div>
+          <div class="text-xs text-neutral-500 mb-2">${escapeHtml(t.subtitle)}</div>
+          <div class="text-[11px] text-neutral-500"><strong>${list.length}</strong> Vorlagen${examples > 0 ? ` · ${examples} Beispiel${examples>1?'e':''}` : ''}${own > 0 ? ` · ${own} eigene` : ''}</div>
+        </button>`;
+    }).join('');
+
+    return renderSectionHeader('Schreiben & Sprechen', '2 Editoren') + `
+      <main class="${pageAnim()}">
+        <h3 class="text-sm font-bold mt-2 mb-2 text-emerald-700 uppercase tracking-wider">Schreiben</h3>
+        <div class="grid gap-3 sm:grid-cols-3 mb-6">${schreibenCards}</div>
+        <h3 class="text-sm font-bold mb-2 text-blue-700 uppercase tracking-wider">Sprechen</h3>
+        <div class="grid gap-3 sm:grid-cols-2">${sprechenCards}</div>
+      </main>
+    `;
+  }
+
+  function renderSectionReferenz() {
+    return renderSectionHeader('Referenz', '3 Karten zum Nachschlagen') + `
+      <main class="${pageAnim()}">
+        <div class="grid gap-3 sm:grid-cols-2">
+          <button data-action="open-reference" data-ref="verb-position"
+                  class="text-left rounded-2xl bg-white border border-neutral-200 hover:border-amber-300 transition p-4">
+            <div class="text-[11px] uppercase tracking-wider font-bold text-amber-700 mb-1">Verb-Position</div>
+            <div class="font-bold text-base mb-1">Die drei Konjunktionsgruppen</div>
+            <div class="text-xs text-neutral-500">Verb ans Ende · Position 2 · Inversion. Mit Vergleichstabelle.</div>
+          </button>
+          <button data-action="open-reference" data-ref="article-patterns"
+                  class="text-left rounded-2xl bg-white border border-neutral-200 hover:border-flag-red transition p-4">
+            <div class="text-[11px] uppercase tracking-wider font-bold text-flag-red mb-1">Artikel-Patterns</div>
+            <div class="font-bold text-base mb-1">Wann ist es der/die/das?</div>
+            <div class="text-xs text-neutral-500">Hochzuverlässige Suffixe + Komposita-Regel + Ausnahmen.</div>
+          </button>
+          <button data-action="open-reference" data-ref="declension"
+                  class="text-left rounded-2xl bg-white border border-neutral-200 hover:border-purple-300 transition p-4 sm:col-span-2">
+            <div class="text-[11px] uppercase tracking-wider font-bold text-purple-700 mb-1">Deklination</div>
+            <div class="font-bold text-base mb-1">Adjektiv-Endungen für alle Kasus & Genera</div>
+            <div class="text-xs text-neutral-500">4×4-Matrix mit drei Mustern pro Zelle, Übersichtstabellen, 5-en-Regel & Co.</div>
+          </button>
+        </div>
+      </main>
+    `;
+  }
+
+
+  function renderResetConfirm() {
+    return `
+      ${renderHeader()}
+      <div class="anim-pop mt-10 rounded-2xl bg-white border-2 border-flag-red p-6">
+        <div class="text-flag-red font-bold text-lg mb-2">Reset all progress?</div>
+        <p class="text-sm text-neutral-600 mb-5">Wipes vocabulary, all 8 grammar modules, and streak from this browser. Cannot be undone.</p>
+        <div class="flex gap-2">
+          <button data-action="cancel-reset" class="flex-1 py-3 rounded-xl bg-white border-2 border-neutral-200 font-bold">Cancel</button>
+          <button data-action="do-reset" class="flex-1 py-3 rounded-xl bg-flag-red text-white font-bold">Yes, reset</button>
+        </div>
+      </div>
+    `;
+  }
+
+  // ============================================================
+  //  Renderers — Sessions
+  // ============================================================
+  function sessionTypeLabel(t) {
+    return ({
+      'vocab-learn':'Learn','vocab-drill':'Drill','mixed-review':'Mixed Review',
+      'nebensatz':'Nebensatz','konjunktiv':'Konjunktiv II',
+      'habensein-practice':'haben/sein · Practice','habensein-blitz':'haben/sein · Blitz',
+      'adjective':'Adjektiv-Endungen','praepLokal':'Präpositionen lokal',
+      'verbPraep':'Verb + Präposition','modalPerfekt':'Modal · Perfekt','relativ':'Relativsätze',
+    })[t] || t;
+  }
+
+  function renderSessionHeader() {
+    const s = state.session;
+    const total = s.cards.length;
+    const cur = Math.min(s.idx + 1, total);
+    const pct = total ? Math.round((s.idx) / total * 100) : 0;
+    const streak = s.streak || 0;
+    return `
+      <header class="pt-5 pb-4">
+        <div class="flex items-center gap-3 mb-3">
+          <button data-action="exit-session"
+                  class="rounded-full w-9 h-9 flex items-center justify-center bg-white border border-neutral-200 hover:bg-neutral-50 transition" aria-label="Exit">
+            <span class="text-lg leading-none">←</span>
+          </button>
+          <div class="flex-1 min-w-0">
+            <div class="text-[11px] text-neutral-500 uppercase tracking-wider font-semibold">${sessionTypeLabel(s.type)}</div>
+            <div class="text-sm font-semibold truncate">${escapeHtml(s.title)}</div>
+          </div>
+          ${streak >= 3
+            ? `<div class="text-xs font-bold rounded-full bg-flag-gold text-flag-ink px-3 py-1 anim-streak">streak ${streak}</div>`
+            : `<div class="text-xs font-medium text-neutral-500">card ${cur} of ${total}</div>`}
+        </div>
+        <div class="h-1.5 bg-neutral-100 rounded-full overflow-hidden">
+          <div class="h-full bg-flag-ink progress-bar" style="width:${pct}%"></div>
+        </div>
+      </header>
+    `;
+  }
+
+  function renderSession() {
+    const s = state.session;
+    if (s.idx >= s.cards.length) return renderSessionEnd();
+    const card = s.cards[s.idx];
+    let body = '';
+    if (s.type === 'vocab-learn')          body = renderVocabLearnCard(card);
+    else if (card.kind === 'vocab')        body = renderVocabDrillCard(card);
+    else if (card.kind === 'nebensatz')    body = renderNebensatzCard(card);
+    else if (card.kind === 'habensein')    body = renderHabenSeinCard(card);
+    else if (card.kind === 'konjunktiv')   body = renderKonjunktivCard(card);
+    else if (card.kind === 'adjective')    body = renderAdjectiveCard(card);
+    else if (card.kind === 'praepLokal')   body = renderPraepLokalCard(card);
+    else if (card.kind === 'verbPraep')    body = renderVerbPraepCard(card);
+    else if (card.kind === 'modalPerfekt') body = renderModalPerfektCard(card);
+    else if (card.kind === 'relativ')      body = renderRelativCard(card);
+    return renderSessionHeader() + body;
+  }
+
+  function renderSessionEnd() {
+    const s = state.session;
+    const total = s.cards.length;
+    const correct = s.stats.correct;
+    const partial = s.stats.partial;
+    const wrong   = s.stats.wrong;
+    const future  = s.stats.future || 0;
+    const pct = total ? Math.round(correct / total * 100) : 0;
+    const remaining = dueRemainingForSession(s);
+    const canContinue = remaining > 0;
+
+    return renderSessionHeader() + `
+      <main class="anim-summary">
+        <div class="bg-white rounded-3xl border border-neutral-200 p-7 sm:p-9 shadow-sm text-center">
+          <div class="text-xs uppercase tracking-wider text-neutral-400 font-semibold">Session complete</div>
+          <div class="mt-2 text-5xl font-extrabold">${correct} / ${total}</div>
+          <div class="text-sm text-neutral-500 mt-1">${pct}% correct · ${future} now scheduled for the future</div>
+          <div class="grid grid-cols-3 gap-2 mt-6 text-sm">
+            <div class="rounded-xl bg-emerald-50 border border-emerald-200 py-3">
+              <div class="text-2xl font-bold text-emerald-700">${correct}</div>
+              <div class="text-[11px] text-emerald-700 font-semibold uppercase tracking-wider">correct</div>
+            </div>
+            <div class="rounded-xl bg-amber-50 border border-amber-200 py-3">
+              <div class="text-2xl font-bold text-amber-700">${partial}</div>
+              <div class="text-[11px] text-amber-700 font-semibold uppercase tracking-wider">partial</div>
+            </div>
+            <div class="rounded-xl bg-red-50 border border-red-200 py-3">
+              <div class="text-2xl font-bold text-red-700">${wrong}</div>
+              <div class="text-[11px] text-red-700 font-semibold uppercase tracking-wider">wrong</div>
+            </div>
+          </div>
+          ${canContinue ? `
+            <button data-action="session-continue"
+                    class="mt-6 w-full py-4 rounded-2xl bg-flag-ink text-white font-bold text-lg hover:bg-neutral-800 transition">
+              Continue session (${Math.min(SESSION_SIZE, remaining)} more)
+            </button>` : `<div class="mt-6 text-sm text-neutral-500">No more cards to pull in this set. Nice work.</div>`}
+          <button data-action="exit-session"
+                  class="mt-3 w-full py-3 rounded-2xl bg-white border-2 border-neutral-200 text-flag-ink font-bold hover:bg-neutral-50 transition">
+            Back to dashboard
+          </button>
+        </div>
+      </main>
+    `;
+  }
+
+  // ----------- Vocab Learn card -----------
+  function renderVocabLearnCard(card) {
+    const w = card.item;
+    const phase = state.cardPhase;
+    const articleHtml = w.article
+      ? `<span class="inline-block ${articleClass(w.article)} text-xs font-bold rounded-full px-2.5 py-1 mr-2 align-middle">${w.article}</span>`
+      : '';
+    const germanCore = w.article ? escapeHtml(stripArticlePrefix(w.german)) : escapeHtml(w.german);
+
+    return `
+      <main class="anim-slide" key="${w.german}">
+        <div class="bg-white rounded-3xl border border-neutral-200 p-7 sm:p-9 shadow-sm">
+          <div class="text-xs uppercase tracking-wider text-neutral-400 font-semibold mb-2">${posLabel(w.pos)}</div>
+          <div class="text-3xl sm:text-4xl font-extrabold leading-tight mb-4 break-words">
+            ${articleHtml}<span>${germanCore}</span>
+          </div>
+          ${phase === 'question' ? `
+            <button data-action="reveal" class="w-full mt-5 py-4 rounded-2xl bg-flag-ink text-white font-bold text-lg hover:bg-neutral-800 transition">
+              Reveal <span class="text-flag-gold/80 text-xs ml-2 font-medium">space</span>
+            </button>` : `
+            <div class="mt-4 anim-pop">
+              <div class="text-xs uppercase tracking-wider text-neutral-400 font-semibold mb-1">English</div>
+              <div class="text-xl sm:text-2xl font-semibold text-neutral-800">${escapeHtml(w.english)}</div>
+              ${w.genderTip ? `
+                <div class="mt-4 rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-900">
+                  <span class="font-bold uppercase text-[10px] tracking-wider mr-1">Tip</span>${escapeHtml(w.genderTip)}
+                </div>` : ''}
+            </div>
+            <div class="mt-6 grid grid-cols-2 gap-3">
+              <button data-action="learn-missed"
+                      class="py-4 rounded-2xl bg-white border-2 border-flag-red text-flag-red font-bold hover:bg-red-50 transition">
+                Missed it <span class="block text-[10px] font-medium opacity-60 mt-0.5">1</span>
+              </button>
+              <button data-action="learn-got"
+                      class="py-4 rounded-2xl bg-flag-ink text-white font-bold hover:bg-neutral-800 transition">
+                Got it <span class="block text-[10px] font-medium opacity-60 mt-0.5">2</span>
+              </button>
+            </div>`}
+        </div>
+        <p class="text-center text-[11px] text-neutral-400 mt-4">space = reveal · 1 = missed · 2 = got it</p>
+      </main>
+    `;
+  }
+
+  // ----------- Vocab Drill card -----------
+  function renderVocabDrillCard(card) {
+    const w = card.item;
+    const phase = state.cardPhase;
+    const isNoun = w.pos === 'noun' && !!w.article;
+    const showLessonTag = state.session.type === 'mixed-review';
+    const fb = state.feedback;
+    const selectedArticle = state.draft.article || '';
+    const draftText = state.draft.text || '';
+
+    let inputBlock = '';
+    if (phase === 'question') {
+      if (isNoun) {
+        inputBlock = `
+          <form id="drill-form" class="mt-6 space-y-3">
+            <div class="flex items-center gap-2">
+              <div class="flex gap-2 justify-center flex-1">
+                ${['der','die','das'].map((a, i) => `
+                  <button type="button" data-pill="${a}" tabindex="0"
+                          class="pill ${selectedArticle === a ? 'active-' + a : ''} ${i === 0 ? 'js-autofocus' : ''}">${a}</button>
+                `).join('')}
+              </div>
+              <button type="button" data-action="show-overlay-ref" data-ref="article-patterns"
+                      class="text-[11px] text-neutral-500 hover:text-flag-red border border-neutral-200 rounded-full px-2.5 py-1 shrink-0"
+                      title="Open Artikel-Patterns reference">📖 Patterns</button>
+            </div>
+            <input id="drill-input" type="text" inputmode="text" autocomplete="off" autocapitalize="words" autocorrect="off" spellcheck="false"
+                   value="${escapeHtml(draftText)}"
+                   placeholder="noun (e.g. Freundschaft)"
+                   class="w-full px-4 py-4 rounded-2xl border-2 border-neutral-200 text-xl font-semibold focus:border-flag-ink transition" />
+            <button type="submit"
+                    class="w-full py-4 rounded-2xl bg-flag-ink text-white font-bold text-lg hover:bg-neutral-800 transition">
+              Check <span class="text-flag-gold/80 text-xs ml-2 font-medium">enter</span>
+            </button>
+          </form>`;
+      } else {
+        inputBlock = `
+          <form id="drill-form" class="mt-6 space-y-3">
+            <input id="drill-input" type="text" inputmode="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"
+                   value="${escapeHtml(draftText)}"
+                   placeholder="German ${posLabel(w.pos).toLowerCase()}"
+                   class="w-full px-4 py-4 rounded-2xl border-2 border-neutral-200 text-xl font-semibold focus:border-flag-ink transition js-autofocus" />
+            <button type="submit"
+                    class="w-full py-4 rounded-2xl bg-flag-ink text-white font-bold text-lg hover:bg-neutral-800 transition">
+              Check <span class="text-flag-gold/80 text-xs ml-2 font-medium">enter</span>
+            </button>
+          </form>`;
+      }
+    }
+
+    let feedbackBlock = '';
+    if (phase === 'feedback' && fb) {
+      const toneBg = fb.tone === 'green' ? 'bg-emerald-50 border-emerald-300 text-emerald-900'
+                  : fb.tone === 'amber' ? 'bg-amber-50 border-amber-300 text-amber-900'
+                  : 'bg-red-50 border-red-300 text-red-900';
+      const icon = fb.tone === 'green' ? '✓' : fb.tone === 'amber' ? '!' : '✗';
+      const animClass = fb.tone === 'green' ? 'anim-pop' : fb.tone === 'red' ? 'anim-shake' : 'anim-pop';
+      const userArticle = state.draft.article || '';
+      const userText = (state.draft.text || '').trim();
+      const userAssembled = isNoun
+        ? `${userArticle ? `<span class="inline-block ${articleClass(userArticle)} text-[10px] font-bold rounded-full px-1.5 py-0.5 mr-1">${userArticle}</span>` : ''}${escapeHtml(userText) || '<span class="opacity-40">(blank)</span>'}`
+        : (escapeHtml(userText) || '<span class="opacity-40">(blank)</span>');
+      const correctAssembled = isNoun
+        ? `<span class="inline-block ${articleClass(w.article)} text-[10px] font-bold rounded-full px-1.5 py-0.5 mr-1">${w.article}</span>${escapeHtml(stripArticlePrefix(w.german))}`
+        : escapeHtml(w.german);
+
+      feedbackBlock = `
+        <div class="${animClass} mt-5 rounded-2xl border-2 ${toneBg} px-4 py-4">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-full bg-white/80 flex items-center justify-center text-xl font-black">${icon}</div>
+            <div class="font-bold text-lg">${fb.label}</div>
+          </div>
+          ${fb.kind !== 'correct' ? `
+            <div class="mt-3 text-sm">
+              <div class="flex gap-2"><span class="opacity-60 w-20 shrink-0">Your answer:</span><span class="font-semibold">${userAssembled}</span></div>
+              <div class="flex gap-2"><span class="opacity-60 w-20 shrink-0">Correct:</span><span class="font-semibold">${correctAssembled}</span></div>
+            </div>` : ''}
+          ${(fb.showTip && w.genderTip) ? `
+            <div class="mt-3 rounded-xl bg-amber-100 border border-amber-300 px-4 py-3 text-sm text-amber-900">
+              <span class="font-bold uppercase text-[10px] tracking-wider mr-1">Gender tip</span>${escapeHtml(w.genderTip)}
+            </div>` : ''}
+        </div>
+        <button data-action="vocab-continue" id="drill-continue"
+                class="mt-5 w-full py-4 rounded-2xl bg-flag-ink text-white font-bold text-lg hover:bg-neutral-800 transition">
+          Continue <span class="text-flag-gold/80 text-xs ml-2 font-medium">enter</span>
+        </button>
+      `;
+    }
+
+    return `
+      <main class="anim-slide" key="${w.german}">
+        <div class="bg-white rounded-3xl border border-neutral-200 p-6 sm:p-8 shadow-sm">
+          ${showLessonTag ? `<div class="text-[11px] text-neutral-400 font-medium mb-2">Vokabeln · ${escapeHtml(card.lesson.title)}</div>` : ''}
+          <div class="text-xs uppercase tracking-wider text-neutral-400 font-semibold mb-2">${posLabel(w.pos)}</div>
+          <div class="text-2xl sm:text-3xl font-extrabold leading-tight break-words">${escapeHtml(w.english)}</div>
+          ${inputBlock}
+          ${feedbackBlock}
+        </div>
+        <p class="text-center text-[11px] text-neutral-400 mt-4">enter = check / continue</p>
+      </main>
+    `;
+  }
+
+  // ----------- Nebensatz card -----------
+  function nebPrefix(item) {
+    if (item.conjunction) return `${item.main_clause} ${item.conjunction}`;
+    return item.main_clause;
+  }
+  function renderNebensatzCard(card) {
+    const it = card.item;
+    const phase = state.cardPhase;
+    const showLessonTag = state.session.type === 'mixed-review';
+    const fb = state.feedback;
+    const userOrder = (state.draft.userOrder || []);
+    const poolTokens = state.draft.pool || it.tokens.slice();
+    const buildTokens = state.draft.build || [];
+    const ready = poolTokens.length === 0 && buildTokens.length > 0;
+    const correctSentence = `${nebPrefix(it)} ${it.correct_order.join(' ')}.`;
+
+    let body;
+    if (phase === 'feedback' && fb) {
+      const toneBg = fb.tone === 'green' ? 'bg-emerald-50 border-emerald-300 text-emerald-900' : 'bg-red-50 border-red-300 text-red-900';
+      const icon = fb.tone === 'green' ? '✓' : '✗';
+      const animClass = fb.tone === 'green' ? 'anim-pop' : 'anim-shake';
+      const userAssembledTokens = userOrder.map((tok, i) => {
+        const right = it.correct_order[i] === tok;
+        const cls = right ? 'token-right' : 'token-wrong';
+        return `<span class="token-chip ${cls}">${escapeHtml(tok)}</span>`;
+      }).join('');
+      body = `
+        <div class="bg-white rounded-3xl border border-neutral-200 p-6 sm:p-8 shadow-sm">
+          ${showLessonTag ? `<div class="text-[11px] text-neutral-400 font-medium mb-2">Grammar · Nebensatz</div>` : ''}
+          <div class="flex items-center gap-2 text-[11px] uppercase tracking-wider font-semibold text-neutral-400 mb-2">
+            <span>Nebensatz · ${escapeHtml(it.type)}</span>
+            ${it.perfekt ? `<span class="bg-flag-gold text-flag-ink px-2 py-0.5 rounded-full">Perfekt-Form</span>` : ''}
+          </div>
+          <div class="text-sm text-neutral-500 mb-3">${escapeHtml(it.prompt_en)}</div>
+          <div class="text-base font-semibold leading-relaxed break-words">
+            <span class="text-neutral-500">${escapeHtml(nebPrefix(it))}</span>
+            <span class="ml-1 inline-flex flex-wrap gap-1.5 align-middle">${userAssembledTokens}</span>
+            <span class="text-neutral-500">.</span>
+          </div>
+          <div class="${animClass} mt-5 rounded-2xl border-2 ${toneBg} px-4 py-4">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-full bg-white/80 flex items-center justify-center text-xl font-black">${icon}</div>
+              <div class="font-bold text-lg">${fb.label}</div>
+            </div>
+            ${fb.kind !== 'correct' ? `
+              <div class="mt-3 text-sm">
+                <div class="opacity-60 mb-0.5">Correct:</div>
+                <div class="font-semibold">${escapeHtml(correctSentence)}</div>
+              </div>
+              <div class="mt-3 rounded-xl bg-white/70 border border-current/20 px-3 py-2 text-sm">
+                <span class="font-bold uppercase text-[10px] tracking-wider mr-1">Hint</span>${escapeHtml(it.hint)}
+              </div>` : ''}
+          </div>
+          <button data-action="generic-continue" id="drill-continue"
+                  class="mt-5 w-full py-4 rounded-2xl bg-flag-ink text-white font-bold text-lg hover:bg-neutral-800 transition">
+            Continue <span class="text-flag-gold/80 text-xs ml-2 font-medium">enter</span>
+          </button>
+        </div>
+      `;
+    } else {
+      const tokenChip = (tok) => `<span class="token-chip" data-token="${escapeHtml(tok)}">${escapeHtml(tok)}</span>`;
+      body = `
+        <div class="bg-white rounded-3xl border border-neutral-200 p-6 sm:p-8 shadow-sm">
+          ${showLessonTag ? `<div class="text-[11px] text-neutral-400 font-medium mb-2">Grammar · Nebensatz</div>` : ''}
+          <div class="flex items-center justify-between gap-2 mb-2">
+            <div class="flex items-center gap-2 text-[11px] uppercase tracking-wider font-semibold text-neutral-400">
+              <span>Nebensatz · ${escapeHtml(it.type)}</span>
+              ${it.perfekt ? `<span class="bg-flag-gold text-flag-ink px-2 py-0.5 rounded-full">Perfekt-Form</span>` : ''}
+            </div>
+            <button data-action="show-overlay-ref" data-ref="verb-position"
+                    class="text-[11px] text-neutral-500 hover:text-amber-700 border border-neutral-200 rounded-full px-2.5 py-1 shrink-0"
+                    title="Open Verb-Position reference">📖 Verb-Position</button>
+          </div>
+          <div class="text-sm text-neutral-500 italic mb-3">"${escapeHtml(it.prompt_en)}"</div>
+          <div class="text-lg sm:text-xl font-semibold leading-snug">
+            <span>${escapeHtml(nebPrefix(it))}</span>
+            <span class="text-neutral-400"> …</span>
+          </div>
+          <div class="text-[11px] uppercase tracking-wider text-neutral-400 font-semibold mt-5 mb-1.5">Build the clause</div>
+          <div id="neb-build" class="build-slot">${buildTokens.map(tokenChip).join('')}</div>
+          <div class="text-[11px] uppercase tracking-wider text-neutral-400 font-semibold mt-4 mb-1.5">Word pool</div>
+          <div id="neb-pool" class="pool-slot">${poolTokens.map(tokenChip).join('')}</div>
+          <button data-action="nebensatz-check" id="neb-check" ${ready ? '' : 'disabled'}
+                  class="mt-5 w-full py-4 rounded-2xl ${ready ? 'bg-flag-ink text-white hover:bg-neutral-800' : 'bg-neutral-200 text-neutral-400 cursor-not-allowed'} font-bold text-lg transition">
+            Check
+          </button>
+          <p class="text-[11px] text-neutral-400 mt-2 text-center">drag, or tap to move tokens between pool and build</p>
+        </div>
+      `;
+    }
+    return `<main class="anim-slide" key="${it.id}">${body}</main>`;
+  }
+
+  // ----------- haben/sein card -----------
+  function renderHabenSeinCard(card) {
+    const it = card.item;
+    const phase = state.cardPhase;
+    const showLessonTag = state.session.type === 'mixed-review';
+    const fb = state.feedback;
+    const forms = SUBJECT_FORMS[it.subject_form] || ['?', '?'];
+    const sentence = it.sentence.replace('___', '<span class="inline-block min-w-[3.5rem] border-b-4 border-flag-ink mx-1 align-middle">&nbsp;</span>');
+
+    let buttonsBlock;
+    if (phase === 'question') {
+      buttonsBlock = `
+        <div class="flex gap-3 mt-6">
+          ${forms.map((f, i) => `
+            <button class="hs-btn js-hs-btn" data-action="hs-pick" data-form="${escapeHtml(f)}" data-idx="${i}">
+              <span class="kbd">${i+1}</span>${escapeHtml(f)}
+            </button>`).join('')}
+        </div>`;
+    } else {
+      buttonsBlock = `
+        <div class="flex gap-3 mt-6">
+          ${forms.map((f, i) => {
+            const isAnswer = f === it.answer;
+            const wasPicked = (state.draft.picked === f);
+            let extra = '';
+            if (isAnswer) extra = 'flash-correct';
+            else if (wasPicked) extra = 'flash-wrong';
+            return `<div class="hs-btn ${extra} cursor-default"><span class="kbd">${i+1}</span>${escapeHtml(f)}</div>`;
+          }).join('')}
+        </div>`;
+    }
+
+    let feedbackBlock = '';
+    if (phase === 'feedback' && fb) {
+      const toneBg = fb.tone === 'green' ? 'bg-emerald-50 border-emerald-300 text-emerald-900' : 'bg-red-50 border-red-300 text-red-900';
+      const animClass = fb.tone === 'green' ? 'anim-pop' : 'anim-shake';
+      feedbackBlock = `
+        <div class="${animClass} mt-5 rounded-2xl border-2 ${toneBg} px-4 py-4">
+          <div class="font-bold text-base mb-1">${fb.label}</div>
+          <div class="text-sm font-semibold mb-2">${escapeHtml(it.full_sentence)}</div>
+          ${fb.kind !== 'correct' ? `
+            <div class="rounded-xl bg-white/70 border border-current/20 px-3 py-2 text-sm">
+              <span class="font-bold uppercase text-[10px] tracking-wider mr-1">Rule</span>${escapeHtml(it.rule)}
+            </div>` : ''}
+        </div>
+        <button data-action="generic-continue" id="drill-continue"
+                class="mt-5 w-full py-4 rounded-2xl bg-flag-ink text-white font-bold text-lg hover:bg-neutral-800 transition">
+          Continue <span class="text-flag-gold/80 text-xs ml-2 font-medium">enter</span>
+        </button>`;
+    }
+
+    return `
+      <main class="anim-slide" key="${it.id}">
+        <div class="bg-white rounded-3xl border border-neutral-200 p-6 sm:p-8 shadow-sm">
+          ${showLessonTag ? `<div class="text-[11px] text-neutral-400 font-medium mb-2">Grammar · haben/sein</div>` : ''}
+          <div class="text-[11px] uppercase tracking-wider font-semibold text-neutral-400 mb-2">${escapeHtml(it.subject_form)} · ${escapeHtml(it.category)}</div>
+          <div class="text-xl sm:text-2xl font-bold leading-snug">${sentence}</div>
+          ${buttonsBlock}
+          ${feedbackBlock}
+        </div>
+        <p class="text-[11px] text-neutral-400 mt-4 text-center">1 = left · 2 = right · enter = continue</p>
+      </main>
+    `;
+  }
+
+  // ----------- haben/sein BLITZ -----------
+  function renderHabenSeinBlitzCard(card) {
+    const it = card.item;
+    const forms = SUBJECT_FORMS[it.subject_form] || ['?', '?'];
+    const sentence = it.sentence.replace('___', '<span class="inline-block min-w-[3.5rem] border-b-4 border-flag-ink mx-1 align-middle">&nbsp;</span>');
+    const score = state.session.blitz.score;
+    const total = state.session.cards.length;
+    const idx   = state.session.idx;
+    return `
+      <main class="anim-slide" key="${it.id}">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="flex-1">
+            <div class="text-[11px] uppercase tracking-wider font-bold text-flag-red">Blitz</div>
+            <div class="text-xs text-neutral-500">${idx+1} of ${total} · ${score} correct</div>
+          </div>
+          <div id="blitz-timer" class="text-3xl font-black text-flag-ink tabular-nums">--.-s</div>
+        </div>
+        <div class="bg-white rounded-3xl border border-neutral-200 p-6 sm:p-8 shadow-sm">
+          <div class="text-[11px] uppercase tracking-wider font-semibold text-neutral-400 mb-2">${escapeHtml(it.subject_form)}</div>
+          <div class="text-xl sm:text-2xl font-bold leading-snug">${sentence}</div>
+          <div class="flex gap-3 mt-6">
+            ${forms.map((f, i) => `
+              <button class="hs-btn js-hs-btn" data-action="hs-blitz-pick" data-form="${escapeHtml(f)}" data-idx="${i}">
+                <span class="kbd">${i+1}</span>${escapeHtml(f)}
+              </button>`).join('')}
+          </div>
+        </div>
+        <div class="flex justify-center mt-4">
+          <button data-action="blitz-quit" class="text-xs text-neutral-400 hover:text-flag-red underline underline-offset-2">Quit blitz</button>
+        </div>
+      </main>
+    `;
+  }
+
+  function renderBlitzResults() {
+    const b = state.session.blitz;
+    const total = state.session.cards.length;
+    const answered = state.session.idx;
+    const correct = b.score;
+    const missed = b.missed;
+    const ranOut = answered < total;
+    const missedSet = new Set(missed.map(m => m.item.id));
+    const allRows = state.session.cards.map((c, i) => {
+      const it = c.item;
+      const wasMissed = missedSet.has(it.id);
+      const wasUnanswered = i >= answered;
+      const status = wasUnanswered ? 'skipped' : wasMissed ? 'missed' : 'correct';
+      return { it, status };
+    });
+    allRows.sort((a, b) => {
+      const order = { missed: 0, skipped: 1, correct: 2 };
+      return order[a.status] - order[b.status];
+    });
+    return `
+      <header class="pt-5 pb-4">
+        <div class="flex items-center gap-3 mb-2">
+          <button data-action="exit-session"
+                  class="rounded-full w-9 h-9 flex items-center justify-center bg-white border border-neutral-200 hover:bg-neutral-50 transition" aria-label="Exit">
+            <span class="text-lg leading-none">←</span>
+          </button>
+          <div class="flex-1">
+            <div class="text-[11px] uppercase tracking-wider font-semibold text-flag-red">Blitz · results</div>
+            <div class="text-sm font-semibold">haben/sein</div>
+          </div>
+        </div>
+      </header>
+      <main class="anim-summary">
+        <div class="bg-white rounded-3xl border border-neutral-200 p-6 sm:p-8 shadow-sm text-center mb-4">
+          <div class="text-xs uppercase tracking-wider text-neutral-400 font-semibold">Time ${ranOut ? "'s up" : 'complete'}</div>
+          <div class="mt-2 text-5xl font-extrabold">${correct} / ${total}</div>
+          <div class="text-sm text-neutral-500 mt-1">${answered} answered · ${missed.length} missed${ranOut ? ` · ${total - answered} skipped` : ''}</div>
+          <button data-action="exit-session"
+                  class="mt-5 w-full py-3 rounded-2xl bg-flag-ink text-white font-bold hover:bg-neutral-800 transition">
+            Back to dashboard
+          </button>
+        </div>
+        <div class="space-y-2">
+          ${allRows.map(({it, status}) => `
+            <div class="rounded-2xl border-2 ${status === 'correct' ? 'border-emerald-200 bg-emerald-50' : status === 'missed' ? 'border-red-200 bg-red-50' : 'border-neutral-200 bg-white'} p-3">
+              <div class="flex items-center gap-2 mb-1">
+                <div class="text-[10px] uppercase tracking-wider font-bold ${status === 'correct' ? 'text-emerald-700' : status === 'missed' ? 'text-red-700' : 'text-neutral-500'}">${status}</div>
+                <div class="text-[10px] text-neutral-400">${escapeHtml(it.subject_form)} · ${escapeHtml(it.category)}</div>
+              </div>
+              <div class="text-sm font-semibold mb-1">${escapeHtml(it.full_sentence)}</div>
+              <div class="text-xs text-neutral-600">${escapeHtml(it.rule)}</div>
+            </div>`).join('')}
+        </div>
+      </main>
+    `;
+  }
+
+  function renderHabenSeinModeSelect() {
+    const stats = moduleStats('habenSein', HABEN_SEIN_ITEMS);
+    return `
+      ${renderHeader()}
+      <main class="anim-in mt-4">
+        <div class="flex items-center gap-3 mb-4">
+          <button data-action="open-section" data-section="section-grammatik"
+                  class="rounded-full w-9 h-9 flex items-center justify-center bg-white border border-neutral-200 hover:bg-neutral-50 transition" aria-label="Back">
+            <span class="text-lg leading-none">←</span>
+          </button>
+          <div>
+            <div class="text-xs text-neutral-400 uppercase tracking-wider font-semibold">Grammar</div>
+            <div class="text-lg font-bold">haben vs. sein</div>
+          </div>
+        </div>
+        <div class="grid gap-3">
+          <button data-action="start-habensein-practice"
+                  class="text-left rounded-2xl bg-white border-2 border-neutral-200 hover:border-flag-ink p-5 transition">
+            <div class="text-[11px] uppercase tracking-wider font-bold text-flag-ink mb-1">Practice</div>
+            <div class="font-bold text-lg mb-1">Take your time</div>
+            <div class="text-sm text-neutral-600">Full feedback per item, builds spaced-repetition state. ${stats.due} due now · ${stats.seen}/${stats.total} seen.</div>
+          </button>
+          <button data-action="start-habensein-blitz"
+                  class="text-left rounded-2xl bg-flag-ink text-white border-2 border-flag-ink p-5 hover:bg-neutral-800 transition">
+            <div class="text-[11px] uppercase tracking-wider font-bold text-flag-gold mb-1">Blitz</div>
+            <div class="font-bold text-lg mb-1">${BLITZ_SIZE} items · ${BLITZ_TIME/1000}s</div>
+            <div class="text-sm text-neutral-300">Pure speed drill. Green/red flash, no SR updates. Ranking at the end.</div>
+          </button>
+        </div>
+      </main>
+    `;
+  }
+
+  // ============================================================
+  //  Generic fill-in renderer parts
+  // ============================================================
+  function renderScaffoldInputs(scaffold, alternatives, blanks, blankFlags, phase) {
+    const parts = splitScaffold(scaffold);
+    let html = '';
+    parts.forEach((part, i) => {
+      html += escapeHtml(part);
+      if (i < parts.length - 1) {
+        const alts = alternatives[i] || [];
+        const maxLen = alts.reduce((m, a) => Math.max(m, (a || '').length), 0);
+        const w = `${Math.max(5, maxLen + 2)}ch`;
+        const flag = blankFlags[i];
+        const klass = flag === 'right' ? 'right' : flag === 'wrong' ? 'wrong' : '';
+        const v = blanks[i] || '';
+        const disabled = phase === 'feedback' ? 'readonly' : '';
+        const auto = i === 0 ? 'js-autofocus' : '';
+        html += `<input type="text" class="fill-input ${klass} ${auto}" data-blank="${i}" style="width:${w}" value="${escapeHtml(v)}" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" ${disabled} />`;
+      }
+    });
+    return html;
+  }
+
+  function feedbackToneClasses(tone) {
+    return tone === 'green' ? 'bg-emerald-50 border-emerald-300 text-emerald-900' : 'bg-red-50 border-red-300 text-red-900';
+  }
+
+  function fillInWrongDetails(item, blanks, blankFlags, scaffoldField = 'scaffold') {
+    return blankFlags.map((flag, i) => {
+      if (flag !== 'wrong') return '';
+      const correct = item.alternatives[i] && item.alternatives[i][0] != null ? item.alternatives[i][0] : item.answers[i];
+      const userVal = (blanks[i] || '').trim();
+      const display = userVal ? `<span class="line-through opacity-60">${escapeHtml(userVal)}</span>` : '<span class="opacity-50 italic">(blank)</span>';
+      const correctDisplay = (correct === '' ? '<em>(no ending)</em>' : escapeHtml(correct));
+      return `<div class="text-sm">${display} <span class="font-semibold">→ ${correctDisplay}</span></div>`;
+    }).join('');
+  }
+
+  // ----------- Konjunktiv card -----------
+  function renderKonjunktivCard(card) {
+    const it = card.item;
+    const phase = state.cardPhase;
+    const showLessonTag = state.session.type === 'mixed-review';
+    const fb = state.feedback;
+    const blanks = state.draft.blanks || it.answers.map(()=> '');
+    const blankFlags = state.draft.blankFlags || it.answers.map(()=> null);
+    const scaffoldHtml = renderScaffoldInputs(it.scaffold, it.alternatives, blanks, blankFlags, phase);
+
+    let feedbackBlock = '';
+    if (phase === 'feedback' && fb) {
+      const toneBg = feedbackToneClasses(fb.tone);
+      const animClass = fb.tone === 'green' ? 'anim-pop' : 'anim-shake';
+      const wrongDetails = fillInWrongDetails(it, blanks, blankFlags);
+      feedbackBlock = `
+        <div class="${animClass} mt-5 rounded-2xl border-2 ${toneBg} px-4 py-4">
+          <div class="font-bold text-base mb-2">${fb.label}</div>
+          ${wrongDetails}
+          ${fb.kind !== 'correct' ? `
+            <div class="mt-3 rounded-xl bg-white/70 border border-current/20 px-3 py-2 text-sm anim-hint">
+              <span class="font-bold uppercase text-[10px] tracking-wider mr-1">Hint</span>${escapeHtml(it.hint)}
+            </div>` : ''}
+        </div>
+        <button data-action="generic-continue" id="drill-continue"
+                class="mt-5 w-full py-4 rounded-2xl bg-flag-ink text-white font-bold text-lg hover:bg-neutral-800 transition">
+          Continue <span class="text-flag-gold/80 text-xs ml-2 font-medium">enter</span>
+        </button>`;
+    }
+
+    return `
+      <main class="anim-slide" key="${it.id}">
+        <form id="fill-form">
+          <div class="bg-white rounded-3xl border border-neutral-200 p-6 sm:p-8 shadow-sm">
+            ${showLessonTag ? `<div class="text-[11px] text-neutral-400 font-medium mb-2">Grammar · Konjunktiv II</div>` : ''}
+            <div class="text-[11px] uppercase tracking-wider font-semibold text-neutral-400 mb-2">Konjunktiv II · Wenn-Sätze</div>
+            <div class="text-sm text-neutral-500 italic mb-3">"${escapeHtml(it.prompt_en)}"</div>
+            <div class="text-lg sm:text-xl font-semibold leading-relaxed">${scaffoldHtml}</div>
+            ${phase === 'question' ? `
+              <button type="submit" class="mt-6 w-full py-4 rounded-2xl bg-flag-ink text-white font-bold text-lg hover:bg-neutral-800 transition">
+                Check <span class="text-flag-gold/80 text-xs ml-2 font-medium">enter</span>
+              </button>` : ''}
+            ${feedbackBlock}
+          </div>
+        </form>
+        <p class="text-center text-[11px] text-neutral-400 mt-4">tab between blanks · enter to check</p>
+      </main>
+    `;
+  }
+
+  // ----------- Adjective card -----------
+  function tableLabel(t) {
+    if (t === 1) return 'Tab. 1 (no article)';
+    if (t === 2) return 'Tab. 2 (def. article)';
+    return 'Mixed (ein / kein / poss.)';
+  }
+  function genderLabel(g) {
+    return ({m:'maskulin',f:'feminin',n:'neutrum',pl:'Plural'})[g] || g;
+  }
+  function renderAdjectiveCard(card) {
+    const it = card.item;
+    const phase = state.cardPhase;
+    const showLessonTag = state.session.type === 'mixed-review';
+    const fb = state.feedback;
+    const blanks = state.draft.blanks || it.answers.map(()=> '');
+    const blankFlags = state.draft.blankFlags || it.answers.map(()=> null);
+    const scaffoldHtml = renderScaffoldInputs(it.prompt, it.alternatives, blanks, blankFlags, phase);
+
+    // Decide whether to surface the declension mini-cell as positive reinforcement.
+    // "Hard" item: the user has lapses on it OR its current SR interval is < 3 days.
+    const isHardItem = card.state && (card.state.lapses > 0 || (card.state.interval || 0) < 3);
+
+    let feedbackBlock = '';
+    if (phase === 'feedback' && fb) {
+      const toneBg = feedbackToneClasses(fb.tone);
+      const animClass = fb.tone === 'green' ? 'anim-pop' : 'anim-shake';
+      const wrongDetails = fillInWrongDetails(it, blanks, blankFlags, 'prompt');
+      const miniCell = renderDeclMiniCell(it);
+      feedbackBlock = `
+        <div class="${animClass} mt-5 rounded-2xl border-2 ${toneBg} px-4 py-4">
+          <div class="font-bold text-base mb-2">${fb.label}</div>
+          ${wrongDetails}
+          ${fb.kind !== 'correct' ? `
+            <div class="mt-3 rounded-xl bg-amber-100 border border-amber-300 px-3 py-2 text-sm text-amber-900 anim-hint">
+              <span class="font-bold uppercase text-[10px] tracking-wider mr-1">Hint</span>${escapeHtml(it.hint)}
+            </div>
+            ${miniCell}
+            <div class="mt-2 text-sm text-neutral-600">Full: <span class="font-semibold">${escapeHtml(it.full)}</span></div>
+            <button data-action="show-overlay-ref" data-ref="declension"
+                    class="mt-3 text-xs font-semibold rounded-full bg-white border border-purple-200 text-purple-800 px-3 py-1.5 hover:bg-purple-50">📖 Volle Tabelle</button>
+            ` : `
+            <div class="mt-2 text-sm text-neutral-700">→ <span class="font-semibold">${escapeHtml(it.full)}</span></div>
+            ${isHardItem ? miniCell : ''}`}
+        </div>
+        <button data-action="generic-continue" id="drill-continue"
+                class="mt-5 w-full py-4 rounded-2xl bg-flag-ink text-white font-bold text-lg hover:bg-neutral-800 transition">
+          Continue <span class="text-flag-gold/80 text-xs ml-2 font-medium">enter</span>
+        </button>`;
+    }
+
+    return `
+      <main class="anim-slide" key="${it.id}">
+        <form id="fill-form">
+          <div class="bg-white rounded-3xl border border-neutral-200 p-6 sm:p-8 shadow-sm">
+            ${showLessonTag ? `<div class="text-[11px] text-neutral-400 font-medium mb-2">Grammar · Adjektiv-Endungen</div>` : ''}
+            ${(() => { const t = tintForShortGender(it.gender); return `
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+              <div class="flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-wider font-semibold">
+                <span class="${t ? `${t.med} ${t.text}` : 'bg-neutral-100 text-neutral-700'} px-2.5 py-0.5 rounded-full">${escapeHtml(it.case)} · ${escapeHtml(genderLabel(it.gender))}</span>
+                <span class="bg-neutral-100 text-neutral-700 px-2.5 py-0.5 rounded-full">${escapeHtml(tableLabel(it.table))}</span>
+              </div>`; })()}
+              <button type="button" data-action="show-overlay-ref" data-ref="declension"
+                      class="text-[11px] text-neutral-500 hover:text-purple-700 border border-neutral-200 rounded-full px-2.5 py-1 shrink-0"
+                      title="Open Deklination reference">📖 Deklination</button>
+            </div>
+            <div class="text-2xl sm:text-3xl font-extrabold leading-relaxed break-words">${scaffoldHtml}</div>
+            ${phase === 'question' ? `
+              <button type="submit" class="mt-6 w-full py-4 rounded-2xl bg-flag-ink text-white font-bold text-lg hover:bg-neutral-800 transition">
+                Check <span class="text-flag-gold/80 text-xs ml-2 font-medium">enter</span>
+              </button>` : ''}
+            ${feedbackBlock}
+          </div>
+        </form>
+        <p class="text-center text-[11px] text-neutral-400 mt-4">tab between blanks · enter to check</p>
+      </main>
+    `;
+  }
+
+  // ----------- PraepLokal card -----------
+  function dirOf(type) {
+    if (type.startsWith('wo-'))    return { kind:'wo',    label:'Wo? Position' };
+    if (type.startsWith('wohin')) return { kind:'wohin', label:'Wohin? Direction' };
+    if (type.startsWith('woher')) return { kind:'woher', label:'Woher? Origin' };
+    return { kind:'wo', label:'Lokal' };
+  }
+  function renderPraepLokalCard(card) {
+    const it = card.item;
+    const phase = state.cardPhase;
+    const showLessonTag = state.session.type === 'mixed-review';
+    const fb = state.feedback;
+    const blanks = state.draft.blanks || it.answers.map(()=> '');
+    const blankFlags = state.draft.blankFlags || it.answers.map(()=> null);
+    const scaffoldHtml = renderScaffoldInputs(it.scaffold, it.alternatives, blanks, blankFlags, phase);
+    const dir = dirOf(it.type);
+    const arrow = dir.kind === 'wohin' ? '➡' : dir.kind === 'woher' ? '⬅' : '◎';
+
+    let feedbackBlock = '';
+    if (phase === 'feedback' && fb) {
+      const toneBg = feedbackToneClasses(fb.tone);
+      const animClass = fb.tone === 'green' ? 'anim-pop' : 'anim-shake';
+      const wrongDetails = fillInWrongDetails(it, blanks, blankFlags);
+      feedbackBlock = `
+        <div class="${animClass} mt-5 rounded-2xl border-2 ${toneBg} px-4 py-4">
+          <div class="font-bold text-base mb-2">${fb.label}</div>
+          ${wrongDetails}
+          ${fb.kind !== 'correct' ? `
+            <div class="mt-3 rounded-xl bg-amber-100 border border-amber-300 px-3 py-2 text-sm text-amber-900 anim-hint">
+              <span class="font-bold uppercase text-[10px] tracking-wider mr-1">Hint</span>${escapeHtml(it.hint)}
+            </div>
+            <div class="mt-2 text-sm text-neutral-600">Full: <span class="font-semibold">${escapeHtml(it.full)}</span></div>` : `
+            <div class="mt-2 text-sm text-neutral-700">→ <span class="font-semibold">${escapeHtml(it.full)}</span></div>`}
+        </div>
+        <button data-action="generic-continue" id="drill-continue"
+                class="mt-5 w-full py-4 rounded-2xl bg-flag-ink text-white font-bold text-lg hover:bg-neutral-800 transition">
+          Continue <span class="text-flag-gold/80 text-xs ml-2 font-medium">enter</span>
+        </button>`;
+    }
+
+    return `
+      <main class="anim-slide" key="${it.id}">
+        <form id="fill-form">
+          <div class="bg-white rounded-3xl border border-neutral-200 p-6 sm:p-8 shadow-sm">
+            ${showLessonTag ? `<div class="text-[11px] text-neutral-400 font-medium mb-2">Grammar · Präpositionen lokal</div>` : ''}
+            <div class="mb-3">
+              <span class="dir-${dir.kind} dir-badge ${dir.kind}">
+                <span class="mr-1">${arrow}</span>${escapeHtml(dir.label)}
+              </span>
+            </div>
+            <div class="text-sm text-neutral-500 italic mb-3">"${escapeHtml(it.prompt_en)}"</div>
+            <div class="text-lg sm:text-xl font-semibold leading-relaxed break-words">${scaffoldHtml}</div>
+            ${phase === 'question' ? `
+              <button type="submit" class="mt-6 w-full py-4 rounded-2xl bg-flag-ink text-white font-bold text-lg hover:bg-neutral-800 transition">
+                Check <span class="text-flag-gold/80 text-xs ml-2 font-medium">enter</span>
+              </button>` : ''}
+            ${feedbackBlock}
+          </div>
+        </form>
+        <p class="text-center text-[11px] text-neutral-400 mt-4">tab between blanks · enter to check</p>
+      </main>
+    `;
+  }
+
+  // ----------- VerbPraep card -----------
+  function renderVerbPraepCard(card) {
+    const it = card.item;
+    const phase = state.cardPhase;
+    const showLessonTag = state.session.type === 'mixed-review';
+    const fb = state.feedback;
+    const blanks = state.draft.blanks || it.answers.map(()=> '');
+    const blankFlags = state.draft.blankFlags || it.answers.map(()=> null);
+    const scaffoldHtml = renderScaffoldInputs(it.scaffold, it.alternatives, blanks, blankFlags, phase);
+
+    let feedbackBlock = '';
+    if (phase === 'feedback' && fb) {
+      const toneBg = feedbackToneClasses(fb.tone);
+      const animClass = fb.tone === 'green' ? 'anim-pop' : 'anim-shake';
+      const wrongDetails = fillInWrongDetails(it, blanks, blankFlags);
+      feedbackBlock = `
+        <div class="${animClass} mt-5 rounded-2xl border-2 ${toneBg} px-4 py-4">
+          <div class="font-bold text-base mb-2">${fb.label}</div>
+          ${wrongDetails}
+          <div class="mt-3 rounded-xl bg-amber-100 border border-amber-300 px-3 py-2 text-sm text-amber-900 anim-hint">
+            <span class="font-bold uppercase text-[10px] tracking-wider mr-1">Pattern</span><span class="font-semibold">${escapeHtml(it.verb_pattern)}</span>
+          </div>
+          ${fb.kind !== 'correct' ? `
+            <div class="mt-2 rounded-xl bg-white/70 border border-current/20 px-3 py-2 text-sm">
+              <span class="font-bold uppercase text-[10px] tracking-wider mr-1">Hint</span>${escapeHtml(it.hint)}
+            </div>` : ''}
+        </div>
+        <button data-action="generic-continue" id="drill-continue"
+                class="mt-5 w-full py-4 rounded-2xl bg-flag-ink text-white font-bold text-lg hover:bg-neutral-800 transition">
+          Continue <span class="text-flag-gold/80 text-xs ml-2 font-medium">enter</span>
+        </button>`;
+    }
+
+    return `
+      <main class="anim-slide" key="${it.id}">
+        <form id="fill-form">
+          <div class="bg-white rounded-3xl border border-neutral-200 p-6 sm:p-8 shadow-sm">
+            ${showLessonTag ? `<div class="text-[11px] text-neutral-400 font-medium mb-2">Grammar · Verb + Präposition</div>` : ''}
+            <div class="mb-3"><span class="verb-chip">${escapeHtml(it.verb)}</span></div>
+            <div class="text-sm text-neutral-500 italic mb-3">"${escapeHtml(it.prompt_en)}"</div>
+            <div class="text-lg sm:text-xl font-semibold leading-relaxed break-words">${scaffoldHtml}</div>
+            ${phase === 'question' ? `
+              <button type="submit" class="mt-6 w-full py-4 rounded-2xl bg-flag-ink text-white font-bold text-lg hover:bg-neutral-800 transition">
+                Check <span class="text-flag-gold/80 text-xs ml-2 font-medium">enter</span>
+              </button>` : ''}
+            ${feedbackBlock}
+          </div>
+        </form>
+        <p class="text-center text-[11px] text-neutral-400 mt-4">enter = check</p>
+      </main>
+    `;
+  }
+
+  // ----------- ModalPerfekt card -----------
+  function renderModalPerfektCard(card) {
+    const it = card.item;
+    const phase = state.cardPhase;
+    const showLessonTag = state.session.type === 'mixed-review';
+    const fb = state.feedback;
+    const blanks = state.draft.blanks || it.answers.map(()=> '');
+    const blankFlags = state.draft.blankFlags || it.answers.map(()=> null);
+    const scaffoldHtml = renderScaffoldInputs(it.scaffold, it.alternatives, blanks, blankFlags, phase);
+    const isNeb = it.type === 'nebensatz';
+    const badge = isNeb ? 'Nebensatz + Doppelinfinitiv' : 'Doppelinfinitiv';
+    const allRight = phase === 'feedback' && fb && fb.kind === 'correct';
+
+    let leadingPrefix = '';
+    if (isNeb) {
+      const conj = (it.conjunction || '').trim();
+      const prefixText = conj ? `${it.main_clause} ${conj}` : it.main_clause;
+      leadingPrefix = `<span class="text-neutral-500 mr-1">${escapeHtml(prefixText)}</span>`;
+    }
+
+    let feedbackBlock = '';
+    if (phase === 'feedback' && fb) {
+      const toneBg = feedbackToneClasses(fb.tone);
+      const animClass = fb.tone === 'green' ? 'anim-pop' : 'anim-shake';
+      const wrongDetails = fillInWrongDetails(it, blanks, blankFlags);
+      const fullCorrect = it.answers.reduce((acc, ans, i) => {
+        const parts = splitScaffold(it.scaffold);
+        return null; // computed below
+      }, null);
+      // Build the full corrected sentence by joining scaffold parts with answers
+      const parts = splitScaffold(it.scaffold);
+      const filled = parts.reduce((acc, part, i) => acc + part + (i < parts.length - 1 ? `<strong>${escapeHtml(it.answers[i])}</strong>` : ''), '');
+      const fullSentence = isNeb
+        ? `${escapeHtml((it.conjunction || '').trim() ? `${it.main_clause} ${it.conjunction}` : it.main_clause)} ${filled}`
+        : filled;
+      feedbackBlock = `
+        <div class="${animClass} mt-5 rounded-2xl border-2 ${toneBg} px-4 py-4">
+          <div class="font-bold text-base mb-2">${fb.label}</div>
+          ${wrongDetails}
+          ${fb.kind !== 'correct' ? `
+            <div class="mt-3 rounded-xl bg-amber-100 border border-amber-300 px-3 py-2 text-sm text-amber-900 anim-hint">
+              <span class="font-bold uppercase text-[10px] tracking-wider mr-1">Hint</span>${escapeHtml(it.hint)}
+            </div>
+            <div class="mt-2 rounded-xl bg-white/70 border border-current/20 px-3 py-2 text-sm">
+              <span class="font-bold uppercase text-[10px] tracking-wider mr-1">Pattern</span>${escapeHtml(it.pattern)}
+            </div>
+            <div class="mt-2 text-sm">→ <span class="font-semibold">${fullSentence}</span></div>` : `
+            <div class="mt-2 rounded-xl bg-white/70 border border-current/20 px-3 py-2 text-sm">
+              <span class="font-bold uppercase text-[10px] tracking-wider mr-1">Pattern</span>${escapeHtml(it.pattern)}
+            </div>`}
+        </div>
+        <button data-action="generic-continue" id="drill-continue"
+                class="mt-5 w-full py-4 rounded-2xl bg-flag-ink text-white font-bold text-lg hover:bg-neutral-800 transition">
+          Continue <span class="text-flag-gold/80 text-xs ml-2 font-medium">enter</span>
+        </button>`;
+    }
+
+    return `
+      <main class="anim-slide" key="${it.id}">
+        <form id="fill-form">
+          <div class="bg-white rounded-3xl border border-neutral-200 p-6 sm:p-8 shadow-sm">
+            ${showLessonTag ? `<div class="text-[11px] text-neutral-400 font-medium mb-2">Grammar · Modal + Perfekt</div>` : ''}
+            <div class="flex flex-wrap items-center gap-2 mb-3">
+              <span class="text-[11px] uppercase tracking-wider font-bold bg-rose-100 text-rose-800 px-2.5 py-0.5 rounded-full">${escapeHtml(badge)}</span>
+              ${isNeb ? `<span class="text-[11px] text-rose-700">aux moves to FRONT of cluster</span>` : ''}
+            </div>
+            <div class="text-sm text-neutral-500 italic mb-2">"${escapeHtml(it.prompt_en)}"</div>
+            ${!isNeb && it.base ? `<div class="text-xs text-neutral-400 mb-3">Quelle: <span class="italic">${escapeHtml(it.base)}</span></div>` : ''}
+            <div class="text-lg sm:text-xl font-semibold leading-relaxed break-words ${allRight ? 'anim-cluster rounded-md px-1' : ''}">${leadingPrefix}${scaffoldHtml}</div>
+            ${phase === 'question' ? `
+              <button type="submit" class="mt-6 w-full py-4 rounded-2xl bg-flag-ink text-white font-bold text-lg hover:bg-neutral-800 transition">
+                Check <span class="text-flag-gold/80 text-xs ml-2 font-medium">enter</span>
+              </button>` : ''}
+            ${feedbackBlock}
+          </div>
+        </form>
+        <p class="text-center text-[11px] text-neutral-400 mt-4">tab between blanks · enter to check</p>
+      </main>
+    `;
+  }
+
+  // ----------- Relativ card -----------
+  function renderRelativCard(card) {
+    const it = card.item;
+    const phase = state.cardPhase;
+    const showLessonTag = state.session.type === 'mixed-review';
+    const fb = state.feedback;
+    const blanks = state.draft.blanks || it.answers.map(()=> '');
+    const blankFlags = state.draft.blankFlags || it.answers.map(()=> null);
+    const scaffoldHtml = renderScaffoldInputs(it.scaffold, it.alternatives, blanks, blankFlags, phase);
+    const isPossessive = it.case === 'gen';
+    const correctIsPossessive = phase === 'feedback' && fb && fb.kind === 'correct' && isPossessive;
+
+    let feedbackBlock = '';
+    if (phase === 'feedback' && fb) {
+      const toneBg = feedbackToneClasses(fb.tone);
+      const animClass = fb.tone === 'green' ? 'anim-pop' : 'anim-shake';
+      const wrongDetails = fillInWrongDetails(it, blanks, blankFlags);
+      feedbackBlock = `
+        <div class="${animClass} mt-5 rounded-2xl border-2 ${toneBg} px-4 py-4">
+          <div class="font-bold text-base mb-2">${fb.label}</div>
+          ${wrongDetails}
+          ${fb.kind !== 'correct' ? `
+            <div class="mt-3 rounded-xl bg-amber-100 border border-amber-300 px-3 py-2 text-sm text-amber-900 anim-hint">
+              <span class="font-bold uppercase text-[10px] tracking-wider mr-1">Hint</span>${escapeHtml(it.hint)}
+            </div>
+            <div class="mt-2 text-sm">→ <span class="font-semibold">${escapeHtml(it.full)}</span></div>` : `
+            ${correctIsPossessive ? `
+              <div class="mt-2 rounded-xl bg-white border border-emerald-200 px-3 py-2 text-xs text-emerald-900 anim-hint">
+                <span class="font-bold uppercase text-[10px] tracking-wider mr-1">Genitiv possessiv</span>
+                <span class="font-mono">dessen</span> (m / n) · <span class="font-mono">deren</span> (f / pl)
+              </div>` : ''}`}
+        </div>
+        <button data-action="generic-continue" id="drill-continue"
+                class="mt-5 w-full py-4 rounded-2xl bg-flag-ink text-white font-bold text-lg hover:bg-neutral-800 transition">
+          Continue <span class="text-flag-gold/80 text-xs ml-2 font-medium">enter</span>
+        </button>`;
+    }
+
+    return `
+      <main class="anim-slide" key="${it.id}">
+        <form id="fill-form">
+          <div class="bg-white rounded-3xl border border-neutral-200 p-6 sm:p-8 shadow-sm">
+            ${showLessonTag ? `<div class="text-[11px] text-neutral-400 font-medium mb-2">Grammar · Relativsätze</div>` : ''}
+            ${(() => { const t = tintForShortGender(it.gender); return `
+            <div class="mb-3">
+              <span class="text-[11px] uppercase tracking-wider font-bold ${t ? `${t.med} ${t.text}` : 'bg-indigo-100 text-indigo-800'} px-2.5 py-0.5 rounded-full">${escapeHtml(it.case)} · ${escapeHtml(genderLabel(it.gender))}</span>
+            </div>`; })()}
+            <div class="text-sm text-neutral-500 italic mb-3">"${escapeHtml(it.prompt_en)}"</div>
+            <div class="grid grid-cols-[1fr_auto_1fr] gap-2 items-center mb-4">
+              <div class="sent-box">${escapeHtml(it.sentence_1)}</div>
+              <div class="text-neutral-400 font-bold">+</div>
+              <div class="sent-box">${escapeHtml(it.sentence_2)}</div>
+            </div>
+            <div class="text-base sm:text-lg font-semibold leading-relaxed break-words">${scaffoldHtml}</div>
+            ${phase === 'question' ? `
+              <button type="submit" class="mt-6 w-full py-4 rounded-2xl bg-flag-ink text-white font-bold text-lg hover:bg-neutral-800 transition">
+                Check <span class="text-flag-gold/80 text-xs ml-2 font-medium">enter</span>
+              </button>` : ''}
+            ${feedbackBlock}
+          </div>
+        </form>
+        <p class="text-center text-[11px] text-neutral-400 mt-4">enter = check</p>
+      </main>
+    `;
+  }
+
+  // ============================================================
+  //  Session lifecycle
+  // ============================================================
+  function freshSession(extras) {
+    // exitTo defaults to whichever section the user came from (last_section)
+    const last = (getUIPrefs().last_section) || 'hub';
+    return { idx:0, stats:{ correct:0, partial:0, wrong:0, future:0 }, streak:0, exitTo: last, ...extras };
+  }
+  function initDraftForCard(card) {
+    if (!card) return {};
+    if (card.kind === 'nebensatz') return { pool: card.item.tokens.slice(), build: [], userOrder: [] };
+    if (card.kind === 'vocab' || card.kind === 'habensein') return {};
+    // fill-in card
+    const answers = card.item.answers || [];
+    return { blanks: answers.map(()=> ''), blankFlags: answers.map(()=> null) };
+  }
+
+  function startVocabLearn(lessonIdx) {
+    const lesson = LESSONS[lessonIdx];
+    const cards = pickVocabSession(lesson, SESSION_SIZE);
+    if (!cards.length) { showToast('No cards available'); return; }
+    state.session = freshSession({ type:'vocab-learn', title:lesson.title, lessonIdx, cards });
+    state.cardPhase = 'question'; state.feedback = null; state.draft = {};
+    state.view = 'session'; render();
+  }
+  function startVocabDrill(lessonIdx) {
+    const lesson = LESSONS[lessonIdx];
+    const cards = pickVocabSession(lesson, SESSION_SIZE);
+    if (!cards.length) { showToast('No cards available'); return; }
+    state.session = freshSession({ type:'vocab-drill', title:lesson.title, lessonIdx, cards });
+    state.cardPhase = 'question'; state.feedback = null; state.draft = {};
+    state.view = 'session'; render();
+  }
+  function startMixedReview() {
+    const cards = pickMixedReview(REVIEW_SIZE);
+    if (!cards.length) { showToast('Nothing due right now'); return; }
+    state.session = freshSession({ type:'mixed-review', title:'All modules', cards });
+    state.cardPhase = 'question'; state.feedback = null;
+    state.draft = initDraftForCard(cards[0]);
+    state.view = 'session'; render();
+  }
+  function startGrammar(kind) {
+    const m = moduleByKind(kind);
+    if (!m) return;
+    const cards = pickGrammarSession(kind, SESSION_SIZE);
+    if (!cards.length) { showToast('No items available'); return; }
+    state.session = freshSession({ type:kind, title:m.label, cards });
+    state.cardPhase = 'question'; state.feedback = null;
+    state.draft = initDraftForCard(cards[0]);
+    state.view = 'session'; render();
+  }
+  function startHabenSeinPractice() {
+    const cards = pickGrammarSession('habensein', SESSION_SIZE);
+    if (!cards.length) { showToast('No items available'); return; }
+    state.session = freshSession({ type:'habensein-practice', title:'haben/sein · Practice', cards });
+    state.cardPhase = 'question'; state.feedback = null; state.draft = {};
+    state.view = 'session'; render();
+  }
+  function startHabenSeinBlitz() {
+    const shuffled = HABEN_SEIN_ITEMS.slice().sort(() => Math.random() - 0.5).slice(0, BLITZ_SIZE);
+    const cards = shuffled.map(it => ({ kind:'habensein', item:it, state:getItemState('habenSein', it.id) }));
+    state.session = freshSession({
+      type:'habensein-blitz', title:'haben/sein · Blitz', cards,
+      blitz:{ score:0, missed:[], endTime:0, timerId:null, ended:false },
+    });
+    state.cardPhase = 'question'; state.feedback = null; state.draft = {};
+    state.view = 'session'; render();
+    startBlitzTimer();
+  }
+
+  function continueSession() {
+    const s = state.session;
+    if (!s) return;
+    let more = [];
+    if (s.type === 'mixed-review')                more = pickMixedReview(REVIEW_SIZE);
+    else if (s.type === 'vocab-learn' || s.type === 'vocab-drill')
+                                                  more = pickVocabSession(LESSONS[s.lessonIdx], SESSION_SIZE);
+    else if (s.type === 'habensein-practice')     more = pickGrammarSession('habensein', SESSION_SIZE);
+    else if (moduleByKind(s.type))                more = pickGrammarSession(s.type, SESSION_SIZE);
+    if (!more.length) { showToast('Nothing more to pull'); return; }
+    s.cards = [...s.cards, ...more];
+    state.cardPhase = 'question'; state.feedback = null;
+    state.draft = initDraftForCard(more[0]);
+    render();
+  }
+
+  function exitSession() {
+    if (state.session && state.session.blitz && state.session.blitz.timerId) {
+      clearInterval(state.session.blitz.timerId);
+    }
+    if (state.session && state.session.idx > 0 && state.session.type !== 'habensein-blitz') {
+      const total = state.session.idx;
+      const c = state.session.stats.correct;
+      showToast(`Saved · ${c}/${total} correct`);
+    }
+    state.view = (state.session && state.session.exitTo) ? state.session.exitTo : 'hub';
+    state.session = null;
+    state.cardPhase = 'question';
+    state.feedback = null;
+    state.draft = {};
+    render();
+  }
+
+  // ============================================================
+  //  Grade / advance
+  // ============================================================
+  function ingestGrade(card, grade) {
+    const type = kindToType(card.kind);
+    const key  = itemKey(card.kind, card.item);
+    const newState = applyGrade(card.state, grade);
+    setItemState(type, key, newState);
+    card.state = newState;
+    if (newState.due > Date.now()) state.session.stats.future += 1;
+    if (grade === 'correct' || grade === 'easy') {
+      state.session.stats.correct += 1;
+      state.session.streak = (state.session.streak || 0) + 1;
+    } else if (grade === 'partial' || grade === 'partial-konj') {
+      state.session.stats.partial += 1;
+      state.session.streak = 0;
+    } else {
+      // wrong, wrong-hard, partial-modal counted as wrong
+      state.session.stats.wrong += 1;
+      state.session.streak = 0;
+    }
+    recordSessionDay();
+  }
+  function advanceCard() {
+    state.session.idx += 1;
+    state.cardPhase = 'question';
+    state.feedback = null;
+    state.draft = {};
+    if (state.session.idx < state.session.cards.length) {
+      const next = state.session.cards[state.session.idx];
+      state.draft = initDraftForCard(next);
+    }
+    render();
+  }
+
+  // ----- Vocab grading -----
+  function gradeVocabFromInput(card) {
+    const w = card.item;
+    const isNoun = w.pos === 'noun' && !!w.article;
+    const article = state.draft.article || '';
+    const text = state.draft.text || '';
+    if (isNoun) {
+      const correctNoun = normalize(stripArticlePrefix(w.german));
+      const userNoun    = normalize(stripArticlePrefix(text));
+      const articleOk   = article.toLowerCase() === w.article.toLowerCase();
+      const wordOk      = userNoun.length > 0 && userNoun === correctNoun;
+      if (articleOk && wordOk) return { kind:'correct', label:'Perfect!', tone:'green' };
+      if (wordOk && !articleOk) return { kind:'partial', label:'Right word — wrong gender', tone:'amber', showTip:true };
+      if (!wordOk && articleOk) return { kind:'partial', label:'Right gender — wrong word', tone:'amber' };
+      return { kind:'wrong', label:'Not quite', tone:'red', showTip:true };
+    }
+    const correct = normalize(w.german);
+    const user    = normalize(text);
+    if (user.length > 0 && user === correct) return { kind:'correct', label:'Perfect!', tone:'green' };
+    return { kind:'wrong', label:'Not quite', tone:'red' };
+  }
+  function checkVocab() {
+    const card = state.session.cards[state.session.idx];
+    const input = document.getElementById('drill-input');
+    if (input) state.draft.text = input.value;
+    state.feedback = gradeVocabFromInput(card);
+    state.cardPhase = 'feedback';
+    render();
+    const cont = document.getElementById('drill-continue');
+    if (cont) cont.focus();
+  }
+
+  // ----- Nebensatz grading -----
+  function checkNebensatz() {
+    const buildEl = document.getElementById('neb-build');
+    const poolEl  = document.getElementById('neb-pool');
+    if (!buildEl || !poolEl) return;
+    const order = Array.from(buildEl.children).map(el => el.dataset.token);
+    const pool  = Array.from(poolEl.children).map(el => el.dataset.token);
+    if (pool.length > 0) { showToast('Place all tokens first'); return; }
+    const card = state.session.cards[state.session.idx];
+    const correct = card.item.correct_order;
+    const isRight = order.length === correct.length && order.every((t, i) => t === correct[i]);
+    state.draft.userOrder = order; state.draft.build = order; state.draft.pool = [];
+    state.feedback = isRight
+      ? { kind:'correct', label:'Genau richtig!', tone:'green' }
+      : { kind:'wrong',   label:'Word order is off', tone:'red' };
+    state.cardPhase = 'feedback';
+    if (!isRight) flashScreen('red');
+    render();
+    const cont = document.getElementById('drill-continue');
+    if (cont) cont.focus();
+  }
+
+  // ----- haben/sein practice grading -----
+  function pickHabenSein(form) {
+    const card = state.session.cards[state.session.idx];
+    const isRight = form === card.item.answer;
+    state.draft.picked = form;
+    state.feedback = isRight
+      ? { kind:'correct', label:'Richtig!',  tone:'green' }
+      : { kind:'wrong',   label:'Not quite', tone:'red' };
+    state.cardPhase = 'feedback';
+    render();
+    const cont = document.getElementById('drill-continue');
+    if (cont) cont.focus();
+  }
+
+  // ----- Generic fill-in grading -----
+  function checkFillIn() {
+    const card = state.session.cards[state.session.idx];
+    const it = card.item;
+    const answers = it.answers || [];
+    const blanks = answers.map((_, i) => {
+      const el = document.querySelector(`input.fill-input[data-blank="${i}"]`);
+      return el ? el.value : '';
+    });
+    const flags = blanks.map((v, i) => {
+      const alts = (it.alternatives[i] && it.alternatives[i].length ? it.alternatives[i] : [it.answers[i]]).map(normalize);
+      return alts.includes(normalize(v)) ? 'right' : 'wrong';
+    });
+    state.draft.blanks = blanks;
+    state.draft.blankFlags = flags;
+    const allRight = flags.every(f => f === 'right');
+    state.feedback = allRight
+      ? { kind:'correct', label:'Alles richtig!',           tone:'green' }
+      : { kind:'wrong',   label:'Some blanks need fixing',  tone:'red' };
+    state.cardPhase = 'feedback';
+    render();
+    const cont = document.getElementById('drill-continue');
+    if (cont) cont.focus();
+  }
+
+  function fillInGradeForKind(kind, allRight) {
+    if (allRight) return 'correct';
+    switch (kind) {
+      case 'verbPraep':    return 'wrong-hard';
+      case 'modalPerfekt': return 'partial-modal';
+      case 'konjunktiv':
+      case 'adjective':
+      case 'praepLokal':   return 'partial-konj';
+      case 'relativ':
+      default:             return 'wrong';
+    }
+  }
+
+  // Generic continue handler — dispatches to the card's grade type
+  function genericContinue() {
+    const card = state.session.cards[state.session.idx];
+    const fb = state.feedback;
+    if (!card || !fb) return;
+    let grade;
+    if (card.kind === 'vocab') {
+      grade = fb.kind; // 'correct' | 'partial' | 'wrong'
+    } else if (card.kind === 'nebensatz') {
+      grade = fb.kind; // 'correct' | 'wrong'
+    } else if (card.kind === 'habensein') {
+      grade = fb.kind; // 'correct' | 'wrong'
+    } else {
+      // fill-in card
+      grade = fillInGradeForKind(card.kind, fb.kind === 'correct');
+    }
+    ingestGrade(card, grade);
+    advanceCard();
+  }
+
+  function learnAdvance(grade) {
+    const card = state.session.cards[state.session.idx];
+    ingestGrade(card, grade);
+    advanceCard();
+  }
+
+  // ----- Blitz -----
+  function startBlitzTimer() {
+    const s = state.session;
+    s.blitz.endTime = Date.now() + BLITZ_TIME;
+    s.blitz.timerId = setInterval(() => {
+      const left = Math.max(0, s.blitz.endTime - Date.now());
+      const el = document.querySelector('#blitz-timer');
+      if (el) el.textContent = (left / 1000).toFixed(1) + 's';
+      if (left <= 0) { clearInterval(s.blitz.timerId); endBlitz(); }
+    }, 100);
+  }
+  function pickHabenSeinBlitz(form) {
+    const s = state.session;
+    if (s.blitz.ended) return;
+    const card = s.cards[s.idx];
+    const isRight = form === card.item.answer;
+    if (isRight) s.blitz.score += 1;
+    else s.blitz.missed.push({ item: card.item, picked: form });
+    flashScreen(isRight ? 'green' : 'red');
+    s.idx += 1;
+    if (s.idx >= s.cards.length) {
+      clearInterval(s.blitz.timerId);
+      endBlitz();
+    } else render();
+  }
+  function endBlitz() {
+    const s = state.session;
+    if (!s) return;
+    s.blitz.ended = true;
+    if (s.blitz.timerId) clearInterval(s.blitz.timerId);
+    recordSessionDay();
+    state.view = 'blitz-results';
+    render();
+  }
+
+  // ============================================================
+  //  Event wiring
+  // ============================================================
+  document.addEventListener('click', (e) => {
+    const t = e.target.closest('[data-action], [data-pill], [data-token]');
+    if (!t) return;
+
+    if (t.dataset.pill) {
+      state.draft = state.draft || {};
+      state.draft.article = t.dataset.pill;
+      const input = document.getElementById('drill-input');
+      if (input) state.draft.text = input.value;
+      render();
+      const fresh = document.getElementById('drill-input');
+      if (fresh) fresh.focus();
+      return;
+    }
+
+    // Token tap-to-move
+    if (t.dataset.token && state.cardPhase === 'question' && state.session) {
+      const cur = state.session.cards[state.session.idx];
+      if (cur && cur.kind === 'nebensatz') {
+        const pool = document.getElementById('neb-pool');
+        const build = document.getElementById('neb-build');
+        if (!pool || !build) return;
+        if (t.parentElement === pool) build.appendChild(t);
+        else if (t.parentElement === build) pool.appendChild(t);
+        const ready = pool.children.length === 0 && build.children.length > 0;
+        const btn = document.getElementById('neb-check');
+        if (btn) {
+          btn.disabled = !ready;
+          btn.className = `mt-5 w-full py-4 rounded-2xl ${ready ? 'bg-flag-ink text-white hover:bg-neutral-800' : 'bg-neutral-200 text-neutral-400 cursor-not-allowed'} font-bold text-lg transition`;
+        }
+        return;
+      }
+    }
+
+    const action = t.dataset.action;
+    switch (action) {
+      case 'start-learn':            startVocabLearn(parseInt(t.dataset.lesson, 10)); break;
+      case 'start-drill':            startVocabDrill(parseInt(t.dataset.lesson, 10)); break;
+      case 'start-mixed':            startMixedReview(); break;
+      case 'start-grammar':          startGrammar(t.dataset.kind); break;
+      case 'open-habensein':         state.view = 'habensein-mode'; render(); break;
+      case 'back-to-dashboard':      state.view = 'hub'; render(); break;
+      case 'start-habensein-practice': startHabenSeinPractice(); break;
+      case 'start-habensein-blitz':  startHabenSeinBlitz(); break;
+
+      case 'exit-session':           exitSession(); break;
+      case 'session-continue':       continueSession(); break;
+      case 'blitz-quit':             endBlitz(); break;
+
+      case 'reveal':                 state.cardPhase = 'reveal'; render(); break;
+      case 'learn-got':              learnAdvance('easy'); break;
+      case 'learn-missed':           learnAdvance('wrong'); break;
+
+      case 'vocab-continue':         genericContinue(); break;
+      case 'generic-continue':       genericContinue(); break;
+      case 'nebensatz-check':        checkNebensatz(); break;
+      case 'hs-pick':                pickHabenSein(t.dataset.form); break;
+      case 'hs-blitz-pick':          pickHabenSeinBlitz(t.dataset.form); break;
+
+      case 'confirm-reset':          state.view = 'reset-confirm'; render(); break;
+      case 'cancel-reset':           state.view = 'hub'; render(); break;
+      case 'do-reset':               clearAllProgress(); state.view = 'hub'; showToast('Progress cleared'); render(); break;
+
+      case 'open-reference': {
+        const r = t.dataset.ref;
+        state.navDir = 'forward';
+        if (r === 'verb-position')         state.view = 'reference-verb';
+        else if (r === 'article-patterns') state.view = 'reference-article';
+        else if (r === 'declension')       state.view = 'reference-decl';
+        render();
+        break;
+      }
+      case 'show-overlay-ref': {
+        const r = t.dataset.ref;
+        if (r === 'verb-position')         state.overlay = 'verb-position';
+        else if (r === 'article-patterns') state.overlay = 'article-patterns';
+        else if (r === 'declension')       state.overlay = 'declension';
+        render();
+        break;
+      }
+      case 'open-section': {
+        state.navDir = 'forward';
+        state.view = t.dataset.section;
+        render();
+        break;
+      }
+      case 'back-to-hub': {
+        state.navDir = 'back';
+        state.view = 'hub';
+        render();
+        break;
+      }
+      case 'decl-toggle-cell': {
+        const id = t.dataset.cell;
+        state.declOpenCell = (state.declOpenCell === id) ? null : id;
+        render();
+        break;
+      }
+      case 'decl-pick-case': {
+        state.declMobileCase = t.dataset.case;
+        render();
+        break;
+      }
+      case 'close-overlay':          state.overlay = null; render(); break;
+
+      case 'open-schreiben':         state.view = 'schreiben-home'; render(); break;
+      case 'open-sprechen':          state.view = 'sprechen-home';  render(); break;
+
+      case 'open-editor': {
+        const area = t.dataset.area;
+        const taskId = t.dataset.task;
+        // Persist any in-flight edit before swapping
+        if (state.editor) persistEditorDraft();
+        state.editor = initEditorFromDraft(area, taskId);
+        state.view = (area === 'schreiben') ? 'schreiben-editor' : 'sprechen-editor';
+        render();
+        break;
+      }
+      case 'close-editor': {
+        if (editorSaveTimer) { clearTimeout(editorSaveTimer); editorSaveTimer = null; }
+        if (state.editor) persistEditorDraft();
+        const area = state.editor && state.editor.area;
+        state.editor = null;
+        state.view = area === 'schreiben' ? 'section-editors' : area === 'sprechen' ? 'section-editors' : 'hub';
+        render();
+        break;
+      }
+      case 'back-to-dashboard':
+        state.view = 'hub'; render(); break;
+
+      case 'toggle-section-rm': {
+        if (!state.editor) break;
+        const title = t.dataset.sectionTitle;
+        const e = state.editor;
+        const cur = e.expandedSections || {};
+        // resolve default if unset
+        const sectionsData = e.area === 'schreiben'
+          ? (getSchreibenTask(e.taskId) || {}).sections || []
+          : (getSprechenTask(e.taskId) || {}).sections || [];
+        const idx = sectionsData.findIndex(s => s.title === title);
+        const wasOpen = cur[title] !== undefined ? cur[title] : (idx < 3);
+        cur[title] = !wasOpen;
+        e.expandedSections = cur;
+        persistEditorDraft();
+        render();
+        break;
+      }
+      case 'toggle-mobile-sidebar':
+        if (state.editor) { state.editor.sidebarOpenMobile = !state.editor.sidebarOpenMobile; render(); }
+        break;
+
+      case 'insert-phrase': {
+        const phrase = t.dataset.phrase;
+        const ta = document.getElementById('editor-body') || document.querySelector('textarea.js-editor-area');
+        if (!ta || !state.editor) break;
+        insertPhraseAt(ta, phrase);
+        // Update model from textarea
+        const idx = parseInt(ta.dataset.slideIdx || '0', 10);
+        if (state.editor.taskId === 'presentation') {
+          state.editor.slides[idx] = ta.value;
+          state.editor.lastFocusedSlide = idx;
+        } else {
+          state.editor.body = ta.value;
+        }
+        scheduleEditorAutosave();
+        // Auto-collapse mobile sidebar after insertion
+        if (state.editor.sidebarOpenMobile) {
+          state.editor.sidebarOpenMobile = false;
+          // Don't full-rerender immediately; let the textarea retain focus.
+          // Schedule a render once user moves on.
+        }
+        break;
+      }
+      case 'insert-phrase-into': {
+        const phrase = t.dataset.phrase;
+        const idxAttr = t.dataset.slideIdx;
+        const e = state.editor;
+        if (!e) break;
+        let target;
+        if (idxAttr !== undefined) {
+          target = document.querySelector(`textarea.js-editor-area[data-slide-idx="${idxAttr}"]`);
+        } else {
+          // general toolbar — use last focused
+          const idx = e.lastFocusedSlide || 0;
+          target = document.querySelector(`textarea.js-editor-area[data-slide-idx="${idx}"]`);
+        }
+        if (!target) break;
+        insertPhraseAt(target, phrase);
+        const i = parseInt(target.dataset.slideIdx || '0', 10);
+        if (e.taskId === 'presentation') {
+          e.slides[i] = target.value;
+          e.lastFocusedSlide = i;
+        } else {
+          e.body = target.value;
+        }
+        scheduleEditorAutosave();
+        break;
+      }
+
+      case 'insert-scenario': {
+        const e = state.editor;
+        if (!e || e.taskId !== 'planning') break;
+        const sel = document.querySelector('select[data-field="scenario"]');
+        const sc = (sel && sel.value) || e.scenario || '';
+        if (!sc) { showToast('Wähle erst ein Szenario aus'); break; }
+        e.scenario = sc;
+        const ta = document.getElementById('editor-body');
+        if (ta) {
+          const head = `Szenario: ${sc}\n\n`;
+          const body = ta.value;
+          if (!body.startsWith('Szenario:')) {
+            ta.value = head + body;
+          } else {
+            ta.value = head + body.replace(/^Szenario:[^\n]*\n+/, '');
+          }
+          e.body = ta.value;
+          ta.focus();
+        }
+        persistEditorDraft();
+        render();
+        break;
+      }
+
+      case 'open-vorlagen-overlay': {
+        if (!state.editor) break;
+        state.overlay = { type:'vorlagen', area: state.editor.area, taskId: state.editor.taskId };
+        render();
+        break;
+      }
+      case 'save-vorlage': {
+        const e = state.editor;
+        if (!e) break;
+        const def = e.title || (e.area === 'schreiben' ? 'Mein Brief' : e.taskId === 'presentation' ? 'Meine Präsentation' : 'Mein Dialog');
+        const name = (window.prompt('Name der Vorlage:', def) || '').trim();
+        if (!name) break;
+        const entry = {
+          name,
+          body: e.body || '',
+        };
+        if (e.area === 'schreiben') {
+          entry.body = e.body || '';
+        } else if (e.taskId === 'planning') {
+          entry.body = e.body || '';
+        } else if (e.taskId === 'presentation') {
+          entry.body = (e.slides || []).join('\n\n');
+        }
+        const saved = saveVorlage(e.area, e.taskId, entry);
+        if (e.taskId === 'presentation' && e.slides) {
+          // store slides + topic too — re-fetch and patch
+          const s = loadState();
+          const bucket = s.sprechen_vorlagen[e.taskId];
+          const v = bucket[bucket.length - 1];
+          if (v && v.id === saved.id) {
+            v.slides = e.slides.slice();
+            v.topic  = e.topic || '';
+            saveState(s);
+          }
+        }
+        e.loadedVorlageId = saved.id;
+        recordSessionDay();
+        showToast('Als Vorlage gespeichert');
+        render();
+        break;
+      }
+      case 'load-vorlage': {
+        const e = state.editor;
+        if (!e) break;
+        const id = t.dataset.id;
+        const list = listVorlagen(e.area, e.taskId);
+        const v = list.find(x => x.id === id);
+        if (!v) break;
+        const dirty = (e.body && e.body.trim()) || (e.slides && e.slides.some(s => s.trim()));
+        if (dirty && !window.confirm('Aktuellen Entwurf überschreiben?')) break;
+        if (e.area === 'schreiben') {
+          e.title = v.name && /Beispiel:/.test(v.name) ? '' : (e.title || '');
+          e.body = v.body || '';
+        } else if (e.taskId === 'planning') {
+          e.body = v.body || '';
+        } else if (e.taskId === 'presentation') {
+          if (v.slides && v.slides.length === 5) e.slides = v.slides.slice();
+          else e.slides = (v.body || '').split(/\n\n+/).slice(0,5);
+          while (e.slides.length < 5) e.slides.push('');
+          if (v.topic) e.topic = v.topic;
+        }
+        e.loadedVorlageId = v.id;
+        state.overlay = null;
+        persistEditorDraft();
+        render();
+        break;
+      }
+      case 'delete-vorlage': {
+        const e = state.editor;
+        if (!e) break;
+        const id = t.dataset.id;
+        if (!window.confirm('Vorlage wirklich löschen?')) break;
+        deleteVorlage(e.area, e.taskId, id);
+        showToast('Vorlage gelöscht');
+        render();
+        break;
+      }
+      case 'copy-vorlage': {
+        const e = state.editor;
+        if (!e) break;
+        const id = t.dataset.id;
+        const list = listVorlagen(e.area, e.taskId);
+        const v = list.find(x => x.id === id);
+        if (!v) break;
+        const newName = (window.prompt('Name der Kopie:', `${v.name} (Kopie)`) || '').trim();
+        if (!newName) break;
+        const entry = { name: newName, body: v.body || '' };
+        const saved = saveVorlage(e.area, e.taskId, entry);
+        if (v.slides) {
+          const s = loadState();
+          const bucket = s.sprechen_vorlagen[e.taskId];
+          const last = bucket[bucket.length - 1];
+          if (last && last.id === saved.id) {
+            last.slides = v.slides.slice();
+            last.topic  = v.topic || '';
+            saveState(s);
+          }
+        }
+        showToast('Kopie erstellt');
+        render();
+        break;
+      }
+
+      case 'new-draft': {
+        const e = state.editor;
+        if (!e) break;
+        if (!window.confirm('Aktuellen Entwurf als verworfen markieren?')) break;
+        if (e.area === 'schreiben') { e.title = ''; e.body = ''; }
+        else if (e.taskId === 'planning') { e.scenario = ''; e.body = ''; }
+        else if (e.taskId === 'presentation') { e.topic = ''; e.slides = ['','','','','']; }
+        e.loadedVorlageId = null;
+        persistEditorDraft();
+        render();
+        break;
+      }
+      case 'export-current': {
+        const e = state.editor;
+        if (!e) break;
+        let txt = '';
+        if (e.area === 'schreiben') {
+          txt = (e.title ? e.title + '\n\n' : '') + (e.body || '');
+        } else if (e.taskId === 'planning') {
+          txt = (e.scenario ? 'Szenario: ' + e.scenario + '\n\n' : '') + (e.body || '');
+        } else {
+          if (e.topic) txt += 'Thema: ' + e.topic + '\n\n';
+          PRES_SLIDE_TITLES.forEach((title, i) => {
+            const body = e.slides[i] || '';
+            if (body.trim()) txt += title + '\n' + body + '\n\n';
+          });
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(txt).then(
+            () => showToast('In die Zwischenablage kopiert'),
+            () => showToast('Kopieren fehlgeschlagen')
+          );
+        } else {
+          showToast('Clipboard nicht verfügbar');
+        }
+        break;
+      }
+
+      case 'open-vorlesen': {
+        if (!state.editor) break;
+        persistEditorDraft();
+        state.view = 'vorlesen';
+        render();
+        break;
+      }
+      case 'close-vorlesen': {
+        stopVorlesenTimer();
+        if (!state.editor) { state.view = 'hub'; render(); break; }
+        state.view = (state.editor.area === 'schreiben') ? 'schreiben-editor' : 'sprechen-editor';
+        render();
+        break;
+      }
+      case 'speak-all':  speakText(buildVorlesenText()); break;
+      case 'speak-stop': if (ttsAvailable()) { try { window.speechSynthesis.cancel(); } catch {} } break;
+
+      case 'export-vorlagen': {
+        const md = buildVorlagenMarkdown();
+        const stamp = new Date().toISOString().slice(0,10);
+        downloadFile(`b1trainer-vorlagen-${stamp}.md`, md);
+        showToast('Markdown heruntergeladen');
+        break;
+      }
+    }
+  });
+
+  // Editor inputs — update state.editor live, debounced autosave
+  document.addEventListener('input', (e) => {
+    const t = e.target;
+    if (!state.editor) return;
+    if (!t.matches || !t.matches('[data-field]')) return;
+    const field = t.dataset.field;
+    const e2 = state.editor;
+    if (field === 'title')         e2.title    = t.value;
+    else if (field === 'body')     e2.body     = t.value;
+    else if (field === 'scenario') e2.scenario = t.value;
+    else if (field === 'topic')    e2.topic    = t.value;
+    else if (field === 'slide') {
+      const idx = parseInt(t.dataset.slideIdx || '0', 10);
+      if (!e2.slides) e2.slides = ['','','','',''];
+      e2.slides[idx] = t.value;
+      e2.lastFocusedSlide = idx;
+    }
+    scheduleEditorAutosave();
+  });
+
+  document.addEventListener('change', (e) => {
+    const t = e.target;
+    if (!state.editor) return;
+    if (t.tagName !== 'SELECT' || !t.dataset.field) return;
+    const field = t.dataset.field;
+    if (field === 'topic') {
+      state.editor.topic = t.value;
+      const input = document.querySelector('input[data-field="topic"]');
+      if (input && input !== t) input.value = t.value;
+      scheduleEditorAutosave();
+    } else if (field === 'scenario') {
+      state.editor.scenario = t.value;
+      scheduleEditorAutosave();
+    }
+  });
+
+  document.addEventListener('focusin', (e) => {
+    const t = e.target;
+    if (!state.editor || !t.matches) return;
+    if (t.matches('textarea[data-field="slide"]')) {
+      state.editor.lastFocusedSlide = parseInt(t.dataset.slideIdx || '0', 10);
+    }
+  });
+
+  document.addEventListener('submit', (e) => {
+    if (!e.target) return;
+    if (e.target.id === 'drill-form') {
+      e.preventDefault();
+      if (state.cardPhase !== 'question' || !state.session) return;
+      checkVocab();
+    } else if (e.target.id === 'fill-form') {
+      e.preventDefault();
+      if (state.cardPhase !== 'question' || !state.session) return;
+      checkFillIn();
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (state.overlay && e.key === 'Escape') { state.overlay = null; render(); return; }
+    if (state.view !== 'session') {
+      if (state.view === 'reset-confirm' && e.key === 'Escape') { state.view = 'hub'; render(); }
+      return;
+    }
+    const s = state.session;
+    if (!s || s.idx >= s.cards.length) return;
+    const card = s.cards[s.idx];
+    if (!card) return;
+
+    // Vocab Learn
+    if (s.type === 'vocab-learn') {
+      if (state.cardPhase === 'question' && e.code === 'Space') { e.preventDefault(); state.cardPhase = 'reveal'; render(); }
+      else if (state.cardPhase === 'reveal' && e.key === '1') { e.preventDefault(); learnAdvance('wrong'); }
+      else if (state.cardPhase === 'reveal' && e.key === '2') { e.preventDefault(); learnAdvance('easy'); }
+      return;
+    }
+
+    // haben/sein keys
+    if (card.kind === 'habensein') {
+      if (s.type === 'habensein-blitz' && state.cardPhase === 'question' && (e.key === '1' || e.key === '2')) {
+        e.preventDefault();
+        const forms = SUBJECT_FORMS[card.item.subject_form] || [];
+        const idx = e.key === '1' ? 0 : 1;
+        if (forms[idx]) pickHabenSeinBlitz(forms[idx]);
+        return;
+      }
+      if (state.cardPhase === 'question' && (e.key === '1' || e.key === '2')) {
+        e.preventDefault();
+        const forms = SUBJECT_FORMS[card.item.subject_form] || [];
+        const idx = e.key === '1' ? 0 : 1;
+        if (forms[idx]) pickHabenSein(forms[idx]);
+        return;
+      }
+      if (state.cardPhase === 'feedback' && e.key === 'Enter') {
+        e.preventDefault(); genericContinue(); return;
+      }
+    }
+
+    // Nebensatz
+    if (card.kind === 'nebensatz') {
+      if (state.cardPhase === 'feedback' && e.key === 'Enter') { e.preventDefault(); genericContinue(); return; }
+      if (state.cardPhase === 'question' && e.key === 'Enter') {
+        e.preventDefault();
+        const buildEl = document.getElementById('neb-build');
+        const poolEl  = document.getElementById('neb-pool');
+        if (buildEl && poolEl && poolEl.children.length === 0 && buildEl.children.length > 0) checkNebensatz();
+        return;
+      }
+    }
+
+    // Vocab drill / Mixed Review (vocab kind) — Enter on feedback advances
+    if (card.kind === 'vocab' && s.type !== 'vocab-learn') {
+      if (state.cardPhase === 'feedback' && e.key === 'Enter') { e.preventDefault(); genericContinue(); return; }
+    }
+
+    // Fill-in cards (Konjunktiv, Adjective, PraepLokal, VerbPraep, ModalPerfekt, Relativ)
+    const fillKinds = ['konjunktiv','adjective','praepLokal','verbPraep','modalPerfekt','relativ'];
+    if (fillKinds.includes(card.kind)) {
+      if (state.cardPhase === 'feedback' && e.key === 'Enter') { e.preventDefault(); genericContinue(); return; }
+    }
+  });
+
+  // ============================================================
+  //  After-render hooks
+  // ============================================================
+  let nebSortPool = null, nebSortBuild = null;
+  function teardownSortables() {
+    if (nebSortPool)  { try { nebSortPool.destroy();  } catch {} nebSortPool = null; }
+    if (nebSortBuild) { try { nebSortBuild.destroy(); } catch {} nebSortBuild = null; }
+  }
+  function setupNebensatzSortables() {
+    teardownSortables();
+    const pool  = document.getElementById('neb-pool');
+    const build = document.getElementById('neb-build');
+    if (!pool || !build || typeof Sortable === 'undefined') return;
+    const opts = {
+      group: 'tokens',
+      animation: 200,
+      ghostClass: 'token-ghost',
+      dragClass: 'token-drag',
+      forceFallback: true,
+      fallbackOnBody: true,
+      fallbackTolerance: 5,
+      delayOnTouchOnly: false,
+      onEnd: () => {
+        const ready = pool.children.length === 0 && build.children.length > 0;
+        const btn = document.getElementById('neb-check');
+        if (btn) {
+          btn.disabled = !ready;
+          btn.className = `mt-5 w-full py-4 rounded-2xl ${ready ? 'bg-flag-ink text-white hover:bg-neutral-800' : 'bg-neutral-200 text-neutral-400 cursor-not-allowed'} font-bold text-lg transition`;
+        }
+        const last = build.lastElementChild;
+        if (last) {
+          last.classList.add('anim-drop');
+          setTimeout(() => last.classList.remove('anim-drop'), 260);
+        }
+      },
+    };
+    nebSortPool  = Sortable.create(pool,  opts);
+    nebSortBuild = Sortable.create(build, opts);
+  }
+
+  function afterRender() {
+    teardownSortables();
+    if (state.view !== 'session' || !state.session) return;
+    const s = state.session;
+    if (s.idx >= s.cards.length) return;
+    const card = s.cards[s.idx];
+    if (!card) return;
+    if (card.kind === 'nebensatz' && state.cardPhase === 'question') setupNebensatzSortables();
+    if (state.cardPhase === 'question') {
+      const focusable = document.querySelector('.js-autofocus');
+      if (focusable) setTimeout(() => focusable.focus(), 30);
+    } else if (state.cardPhase === 'feedback') {
+      const cont = document.getElementById('drill-continue');
+      if (cont) setTimeout(() => cont.focus(), 30);
+    }
+  }
+
+  // ============================================================
+  //  Editor state, helpers, persistence
+  // ============================================================
+  function getSchreibenTask(taskId) { return SCHREIBEN_REDEMITTEL.find(t => t.id === taskId); }
+  function getSprechenTask(taskId)  { return SPRECHEN_REDEMITTEL.find(t => t.id === taskId); }
+
+  const PRES_SLIDE_TITLES = [
+    'Folie 1: Einleitung',
+    'Folie 2: Persönliche Erfahrungen',
+    'Folie 3: Heimatland',
+    'Folie 4: Vor- und Nachteile',
+    'Folie 5: Abschluss',
+  ];
+  const PRES_SECTION_FOR_SLIDE = [
+    'Folie 1: Einleitung',
+    'Folie 2: Persönliche Erfahrungen',
+    'Folie 3: Situation im Heimatland',
+    'Folie 4: Vor- und Nachteile',
+    'Folie 5: Abschluss',
+  ];
+  const PRES_GENERAL_SECTIONS = [
+    'Auf Fragen antworten',
+    'Übergänge zwischen Folien',
+  ];
+
+  function initEditorFromDraft(area, taskId) {
+    const draft = getDraft(area, taskId);
+    if (area === 'schreiben') {
+      return {
+        area, taskId,
+        title: (draft && draft.title) || '',
+        body:  (draft && draft.body)  || '',
+        loadedVorlageId: (draft && draft.loadedVorlageId) || null,
+        expandedSections: (draft && draft.expandedSections) || null,
+        lastFocusedSlide: 0,
+        sidebarOpenMobile: false,
+      };
+    }
+    if (taskId === 'planning') {
+      return {
+        area, taskId,
+        scenario: (draft && draft.scenario) || '',
+        body:     (draft && draft.body)     || '',
+        loadedVorlageId: (draft && draft.loadedVorlageId) || null,
+        expandedSections: (draft && draft.expandedSections) || null,
+        lastFocusedSlide: 0,
+        sidebarOpenMobile: false,
+      };
+    }
+    // presentation
+    return {
+      area, taskId,
+      topic: (draft && draft.topic) || '',
+      slides: (draft && Array.isArray(draft.slides) && draft.slides.length === 5)
+              ? draft.slides.slice() : ['','','','',''],
+      loadedVorlageId: (draft && draft.loadedVorlageId) || null,
+      expandedSections: (draft && draft.expandedSections) || null,
+      lastFocusedSlide: 0,
+      sidebarOpenMobile: false,
+    };
+  }
+
+  function persistEditorDraft() {
+    if (!state.editor) return;
+    const e = state.editor;
+    const data = {
+      title: e.title, body: e.body, scenario: e.scenario,
+      topic: e.topic, slides: e.slides,
+      loadedVorlageId: e.loadedVorlageId,
+      expandedSections: e.expandedSections,
+    };
+    setDraft(e.area, e.taskId, data);
+    // Streak: any editor save where total content ≥ 50 chars counts the day
+    const total = (e.body || '') + (e.title || '') + (e.scenario || '') + (e.topic || '') + ((e.slides || []).join(''));
+    if (total.replace(/\s+/g,'').length >= 50) recordSessionDay();
+  }
+
+  function scheduleEditorAutosave() {
+    if (editorSaveTimer) clearTimeout(editorSaveTimer);
+    editorSaveTimer = setTimeout(() => { persistEditorDraft(); editorSaveTimer = null; }, 1000);
+  }
+
+  function wordCount(text) {
+    return (text || '').trim().split(/\s+/).filter(Boolean).length;
+  }
+  function snippet(text, n = 100) {
+    const t = (text || '').replace(/\s+/g, ' ').trim();
+    if (t.length <= n) return t;
+    return t.slice(0, n).trimEnd() + '…';
+  }
+  function fmtDate(ts) {
+    if (!ts) return '';
+    const d = new Date(ts);
+    return d.toLocaleDateString(undefined, { year:'numeric', month:'short', day:'numeric' });
+  }
+
+  // Insert phrase at cursor of given textarea, with surrounding whitespace cleanup
+  function insertPhraseAt(textarea, phrase) {
+    if (!textarea) return;
+    const v = textarea.value;
+    const start = textarea.selectionStart || 0;
+    const end   = textarea.selectionEnd   || 0;
+    const before = v.slice(0, start);
+    const after  = v.slice(end);
+    const needLeadSpace  = before.length > 0 && !/\s$/.test(before);
+    const needTrailSpace = after.length > 0 && !/^\s/.test(after);
+    const insert = (needLeadSpace ? ' ' : '') + phrase + (needTrailSpace ? ' ' : '');
+    const next = before + insert + after;
+    textarea.value = next;
+    const newCursor = (before + insert).length;
+    textarea.setSelectionRange(newCursor, newCursor);
+    textarea.focus();
+    textarea.classList.add('flash');
+    setTimeout(() => textarea.classList.remove('flash'), 600);
+  }
+
+  // ============================================================
+  //  Reference card renderers
+  // ============================================================
+  function renderVerbPositionRef(opts = {}) {
+    const ref = VERB_POSITION_REFERENCE;
+    const groupColor = (g) => ({ amber:'amber', blue:'blue', purple:'purple' }[g.color] || 'neutral');
+    const groupBox = (g) => {
+      const c = groupColor(g);
+      return `
+        <section class="rounded-2xl border-2 border-${c}-200 bg-${c}-50/40 p-4 mb-4">
+          <div class="flex items-baseline gap-2 mb-1">
+            <span class="text-${c}-700 font-mono text-base">${escapeHtml(g.icon)}</span>
+            <h3 class="font-extrabold text-${c}-900 text-lg">${escapeHtml(g.label)}</h3>
+          </div>
+          <div class="text-xs text-${c}-700 uppercase tracking-wider font-semibold mb-2">${escapeHtml(g.sublabel)}</div>
+          <p class="text-sm text-${c}-900 mb-3">${escapeHtml(g.rule)}</p>
+          <div class="space-y-1.5">
+            ${g.items.map(it => `
+              <div class="rounded-lg bg-white border border-${c}-100 p-2.5">
+                <div class="flex flex-col sm:flex-row sm:items-baseline sm:gap-3">
+                  <code class="text-${c}-700 font-bold text-sm shrink-0">${escapeHtml(it.conj)}</code>
+                  <span class="text-xs text-neutral-500 shrink-0">${escapeHtml(it.meaning)}</span>
+                </div>
+                <div class="text-sm mt-1 text-neutral-800">${escapeHtml(it.example)}</div>
+              </div>`).join('')}
+          </div>
+          ${g.note ? `<p class="text-xs text-${c}-800 mt-3 italic">${escapeHtml(g.note)}</p>` : ''}
+        </section>
+      `;
+    };
+
+    const compTable = `
+      <section class="rounded-2xl border-2 border-flag-ink bg-flag-ink text-white p-5 mt-2">
+        <h3 class="font-extrabold text-lg mb-2">${escapeHtml(ref.comparison_table.title)}</h3>
+        <div class="space-y-2">
+          ${ref.comparison_table.rows.map(r => `
+            <div>
+              <div class="text-[10px] uppercase tracking-wider font-semibold text-flag-gold">${escapeHtml(r.type)}</div>
+              <div class="text-base font-semibold">${escapeHtml(r.example)}</div>
+            </div>`).join('')}
+        </div>
+      </section>
+    `;
+
+    const inner = `
+      <div class="text-xs uppercase tracking-wider font-bold text-amber-700">Referenz</div>
+      <h2 class="text-2xl font-extrabold mt-1 mb-1">${escapeHtml(ref.title)}</h2>
+      <p class="text-sm text-neutral-600 mb-5">${escapeHtml(ref.subtitle)}</p>
+      ${ref.groups.map(groupBox).join('')}
+      ${compTable}
+    `;
+    if (opts.overlay) return inner;
+    return `
+      ${renderRefHeader('verb')}
+      <main class="anim-in">${inner}</main>
+    `;
+  }
+
+  function renderArticlePatternsRef(opts = {}) {
+    const ref = ARTICLE_PATTERNS_REFERENCE;
+    const colorFor = (g) => g.id === 'always-der' ? 'blue' : g.id === 'always-die' ? 'red' : 'neutral';
+    const sizeFor = (g) => g.id === 'always-die' ? 'highlight' : 'normal';
+
+    const groupBox = (g) => {
+      const c = colorFor(g);
+      const articleClass = c === 'blue' ? 'bg-blue-100 text-blue-900 border-blue-200'
+                         : c === 'red'  ? 'bg-red-100 text-red-900 border-red-200'
+                         : 'bg-neutral-100 text-neutral-800 border-neutral-200';
+      const isHi = sizeFor(g) === 'highlight';
+      return `
+        <section class="rounded-2xl border-2 ${isHi ? 'border-red-300 bg-red-50/60 p-5' : 'border-neutral-200 bg-white p-4'} mb-4">
+          <div class="flex items-baseline gap-2 mb-1">
+            <span class="text-base">${escapeHtml(g.icon)}</span>
+            <h3 class="font-extrabold ${isHi ? 'text-xl' : 'text-lg'}">${escapeHtml(g.label)}</h3>
+            <span class="ml-auto rounded-full ${articleClass} px-2.5 py-0.5 text-xs font-bold border">${escapeHtml(g.article)}</span>
+          </div>
+          <p class="text-sm text-neutral-700 mb-3">${escapeHtml(g.rule)}</p>
+          <div class="space-y-2">
+            ${g.items.map(it => `
+              <div>
+                <div class="text-xs font-semibold text-neutral-600 mb-1">${escapeHtml(it.pattern)}</div>
+                <div class="flex flex-wrap gap-1.5">
+                  ${it.examples.map(ex => `<span class="rounded-md ${articleClass} border px-2 py-0.5 text-xs">${escapeHtml(ex)}</span>`).join('')}
+                </div>
+              </div>`).join('')}
+          </div>
+          ${g.note ? `<p class="text-xs text-neutral-700 mt-3 italic">${escapeHtml(g.note)}</p>` : ''}
+        </section>
+      `;
+    };
+
+    const exceptions = `
+      <section class="rounded-2xl border border-neutral-200 bg-white p-4 mb-4">
+        <h3 class="font-extrabold text-base mb-2">${escapeHtml(ref.exceptions_to_remember.title)}</h3>
+        <div class="grid sm:grid-cols-2 gap-2">
+          ${ref.exceptions_to_remember.items.map(x => `
+            <div class="text-sm">
+              <span class="font-bold">${escapeHtml(x.word)}</span>
+              <span class="text-neutral-500 text-xs">— ${escapeHtml(x.note)}</span>
+            </div>`).join('')}
+        </div>
+      </section>
+    `;
+
+    const compounds = `
+      <section class="rounded-2xl border border-neutral-200 bg-white p-4">
+        <h3 class="font-extrabold text-base mb-1">${escapeHtml(ref.compound_rule.title)}</h3>
+        <p class="text-sm text-neutral-700 mb-3">${escapeHtml(ref.compound_rule.explanation)}</p>
+        <div class="space-y-1.5">
+          ${ref.compound_rule.examples.map(ex => `
+            <div class="rounded-lg bg-neutral-50 px-3 py-2 text-sm">
+              <span class="font-bold">${escapeHtml(ex.compound)}</span>
+              <div class="text-xs text-neutral-600 mt-0.5">${escapeHtml(ex.parts)}</div>
+            </div>`).join('')}
+        </div>
+      </section>
+    `;
+
+    const inner = `
+      <div class="text-xs uppercase tracking-wider font-bold text-flag-red">Referenz</div>
+      <h2 class="text-2xl font-extrabold mt-1 mb-1">${escapeHtml(ref.title)}</h2>
+      <p class="text-sm text-neutral-600 mb-5">${escapeHtml(ref.subtitle)}</p>
+      ${ref.groups.map(groupBox).join('')}
+      ${exceptions}
+      ${compounds}
+    `;
+    if (opts.overlay) return inner;
+    return `
+      ${renderRefHeader('article')}
+      <main class="anim-in">${inner}</main>
+    `;
+  }
+
+  function renderRefHeader(kind) {
+    const titles = { verb:'Verb-Position', article:'Artikel-Patterns', decl:'Deklination' };
+    return `
+      <header class="pt-5 pb-4">
+        <div class="flex items-center gap-3">
+          <button data-action="open-section" data-section="section-referenz"
+                  class="rounded-full w-9 h-9 flex items-center justify-center bg-white border border-neutral-200 hover:bg-neutral-50 transition" aria-label="Zurück">
+            <span class="text-lg leading-none">←</span>
+          </button>
+          <div>
+            <div class="text-[11px] text-neutral-500 uppercase tracking-wider font-semibold">Referenz</div>
+            <div class="text-sm font-semibold">${escapeHtml(titles[kind] || '')}</div>
+          </div>
+        </div>
+      </header>
+    `;
+  }
+
+  // ============================================================
+  //  Declension Reference renderer
+  // ============================================================
+  const DECL_CASES   = ['nominativ','akkusativ','dativ','genitiv'];
+  const DECL_GENDERS = ['maskulin','neutrum','feminin','plural'];
+  const DECL_PATTERNS = [
+    { id:'def',  label:'def', cls:'decl-pat-def',  soft:'decl-pat-def-soft',  legendBg:'bg-blue-100 text-blue-900 border-blue-200' },
+    { id:'zero', label:'zero',cls:'decl-pat-zero', soft:'decl-pat-zero-soft', legendBg:'bg-amber-100 text-amber-900 border-amber-200' },
+    { id:'ein',  label:'ein', cls:'decl-pat-ein',  soft:'decl-pat-ein-soft',  legendBg:'bg-purple-100 text-purple-900 border-purple-200' },
+  ];
+  const DECL_LABELS = {
+    nominativ:'Nom.', akkusativ:'Akk.', dativ:'Dat.', genitiv:'Gen.',
+    maskulin:'mask.', neutrum:'neut.', feminin:'fem.', plural:'Pl.',
+  };
+  // Gender column tints — blue / green / red / yellow (consistent everywhere)
+  const GENDER_TINTS = {
+    maskulin: { soft:'bg-blue-50',   med:'bg-blue-100',   border:'border-blue-300',   text:'text-blue-800',   accent:'bg-blue-500' },
+    neutrum:  { soft:'bg-green-50',  med:'bg-green-100',  border:'border-green-300',  text:'text-green-800',  accent:'bg-green-500' },
+    feminin:  { soft:'bg-red-50',    med:'bg-red-100',    border:'border-red-300',    text:'text-red-800',    accent:'bg-red-500' },
+    plural:   { soft:'bg-yellow-50', med:'bg-yellow-100', border:'border-yellow-400', text:'text-yellow-800', accent:'bg-yellow-500' },
+  };
+  function tintForShortGender(g) {
+    const map = { m:'maskulin', n:'neutrum', f:'feminin', pl:'plural' };
+    return GENDER_TINTS[map[g] || g] || null;
+  }
+  // Map summary table column index → gender (header is ['', 'mask.','fem.','neut.','Pl.'])
+  const SUMMARY_COL_GENDER = [null, 'maskulin', 'feminin', 'neutrum', 'plural'];
+  function declCase(item) {
+    if (!item || !item.case) return null;
+    const c = item.case.toLowerCase();
+    if (c.startsWith('nom')) return 'nominativ';
+    if (c.startsWith('akk')) return 'akkusativ';
+    if (c.startsWith('dat')) return 'dativ';
+    if (c.startsWith('gen')) return 'genitiv';
+    return null;
+  }
+  function declGender(item) {
+    if (!item) return null;
+    if (item.gender === 'm') return 'maskulin';
+    if (item.gender === 'n') return 'neutrum';
+    if (item.gender === 'f') return 'feminin';
+    if (item.gender === 'pl') return 'plural';
+    return null;
+  }
+  function declPatternFor(item) {
+    if (!item) return 'def';
+    if (item.table === 1) return 'zero';
+    if (item.table === 2) return 'def';
+    return 'ein';
+  }
+  function getDeclCellRow(caseKey, genderKey, patternId) {
+    const m = DECLENSION_REFERENCE.matrix;
+    const cell = m && m[caseKey] && m[caseKey][genderKey];
+    if (!cell) return null;
+    const row = cell[patternId];
+    return row ? { ...row, caseKey, genderKey, patternId, anchor: cell.anchor } : null;
+  }
+
+  function renderDeclLegend() {
+    const ref = DECLENSION_REFERENCE;
+    return `
+      <div class="rounded-2xl bg-white border border-neutral-200 p-4 mb-4">
+        <div class="text-xs uppercase tracking-wider font-semibold text-neutral-500 mb-1">${escapeHtml(ref.legend.intro)}</div>
+        <div class="flex flex-wrap gap-2">
+          ${ref.legend.patterns.map((p, i) => {
+            const pat = DECL_PATTERNS[i];
+            return `
+              <div class="rounded-xl border px-3 py-2 ${pat.legendBg}">
+                <div class="text-xs uppercase tracking-wider font-bold">${escapeHtml(p.label)}</div>
+                <div class="text-[11px] opacity-80">${escapeHtml(p.note)}</div>
+              </div>`;
+          }).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  function renderDeclSummaryTables(opts = {}) {
+    const s = DECLENSION_REFERENCE.summary;
+    const tableHtml = (table) => `
+      <div class="rounded-2xl bg-white border border-neutral-200 p-3 overflow-hidden">
+        <div class="text-[11px] uppercase tracking-wider font-bold text-neutral-700 mb-2">${escapeHtml(table.label)}</div>
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="text-[11px] uppercase tracking-wider">
+              ${table.header.map((h,i) => {
+                const g = SUMMARY_COL_GENDER[i];
+                if (!g) return `<th class="text-left py-1 px-1 text-neutral-500">${escapeHtml(h)}</th>`;
+                const t = GENDER_TINTS[g];
+                return `<th class="text-center py-1 px-1 rounded-t-md ${t.med} ${t.text} font-bold">${escapeHtml(h)}</th>`;
+              }).join('')}
+            </tr>
+          </thead>
+          <tbody>
+            ${table.rows.map(row => `
+              <tr class="decl-row hover:bg-neutral-50 border-t border-neutral-100">
+                ${row.map((cell, i) => {
+                  if (i === 0) return `<td class="text-left font-semibold text-neutral-700 py-1.5 px-1">${escapeHtml(cell)}</td>`;
+                  const g = SUMMARY_COL_GENDER[i];
+                  const t = g ? GENDER_TINTS[g] : null;
+                  return `<td class="text-center font-mono py-1.5 px-1 ${t ? t.soft : ''}">${escapeHtml(cell)}</td>`;
+                }).join('')}
+              </tr>`).join('')}
+          </tbody>
+        </table>
+        ${table.note ? `<div class="text-[11px] text-neutral-500 italic mt-2">${escapeHtml(table.note)}</div>` : ''}
+      </div>
+    `;
+    const colsClass = opts.compact ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-3';
+    return `
+      <div class="mb-4">
+        <h3 class="text-base font-extrabold mb-2">${escapeHtml(s.title)}</h3>
+        <div class="grid gap-3 ${colsClass}">
+          ${tableHtml(s.table_def)}
+          ${tableHtml(s.table_zero)}
+          ${tableHtml(s.table_ein)}
+        </div>
+      </div>
+    `;
+  }
+
+  function renderDeclMatrixCell(caseKey, genderKey, opts = {}) {
+    const cell = (DECLENSION_REFERENCE.matrix[caseKey] || {})[genderKey];
+    if (!cell) return '';
+    const cellId = `${caseKey}-${genderKey}`;
+    const open = (state.declOpenCell === cellId) || opts.alwaysOpen;
+    const tint = GENDER_TINTS[genderKey];
+    const rows = DECL_PATTERNS.map(pat => {
+      const row = cell[pat.id];
+      if (!row) return '';
+      return `
+        <div class="px-1 py-1.5 border-t border-white/60 first:border-t-0">
+          <div class="flex items-baseline gap-2">
+            <span class="text-[10px] uppercase tracking-wider font-bold ${pat.cls} rounded px-1.5 py-0.5 shrink-0">${escapeHtml(row.ending)}</span>
+            <span class="text-sm font-semibold">${escapeHtml(row.phrase)}</span>
+          </div>
+          ${open ? `<div class="text-[12px] text-neutral-700 mt-1 italic">${escapeHtml(row.sentence)}</div>` : ''}
+        </div>
+      `;
+    }).join('');
+    // Gender-tinted card: soft bg + colored left border + colored gender label
+    return `
+      <div class="decl-cell rounded-2xl bg-white border border-neutral-200 border-l-4 ${tint.border} ${tint.soft} p-3">
+        <button data-action="decl-toggle-cell" data-cell="${cellId}"
+                class="w-full text-left">
+          <div class="flex items-baseline justify-between mb-1.5">
+            <div class="text-[11px] uppercase tracking-wider font-bold ${tint.text}">
+              <span class="text-neutral-500">${escapeHtml(DECL_LABELS[caseKey])} ·</span> ${escapeHtml(DECL_LABELS[genderKey])}
+            </div>
+            <div class="text-[10px] text-neutral-400">${open ? '▴' : '▾'}</div>
+          </div>
+        </button>
+        ${rows}
+      </div>
+    `;
+  }
+
+  function renderDeclMatrix(opts = {}) {
+    const compact = !!opts.compact;
+    // Desktop: full 4x4 grid with all cells visible
+    // Mobile / compact: case picker + 4 stacked gender cards
+    const desktop = compact ? '' : `
+      <div class="hidden lg:block mb-4">
+        <h3 class="text-base font-extrabold mb-2">Volle Matrix</h3>
+        <div class="grid gap-2 grid-cols-[6rem_repeat(4,minmax(0,1fr))] mb-1">
+          <div></div>
+          ${DECL_GENDERS.map(g => {
+            const t = GENDER_TINTS[g];
+            return `<div class="text-xs uppercase tracking-wider font-bold ${t.text} ${t.med} text-center py-1.5 rounded-md">${escapeHtml(DECL_LABELS[g])}</div>`;
+          }).join('')}
+        </div>
+        ${DECL_CASES.map(c => `
+          <div class="grid gap-2 grid-cols-[6rem_repeat(4,minmax(0,1fr))] items-stretch mt-2">
+            <div class="flex items-center text-[11px] uppercase tracking-wider font-bold text-neutral-500">${escapeHtml(DECL_LABELS[c])}</div>
+            ${DECL_GENDERS.map(g => renderDeclMatrixCell(c, g)).join('')}
+          </div>`).join('')}
+        <div class="text-[11px] text-neutral-400 mt-2">Tipp: Zelle anklicken, um den vollen Beispielsatz zu sehen.</div>
+      </div>
+    `;
+    const activeCase = state.declMobileCase || 'nominativ';
+    const mobile = `
+      <div class="${compact ? '' : 'lg:hidden '}mb-4">
+        <h3 class="text-base font-extrabold mb-2">Volle Matrix</h3>
+        <div class="flex gap-1 mb-3 overflow-x-auto">
+          ${DECL_CASES.map(c => `
+            <button data-action="decl-pick-case" data-case="${c}"
+                    class="text-xs font-semibold rounded-full px-3 py-1.5 ${activeCase === c ? 'bg-flag-ink text-white' : 'bg-white border border-neutral-200'}">${escapeHtml(DECL_LABELS[c])}</button>`).join('')}
+        </div>
+        <div class="grid gap-2">
+          ${DECL_GENDERS.map(g => renderDeclMatrixCell(activeCase, g, { alwaysOpen: true })).join('')}
+        </div>
+      </div>
+    `;
+    return desktop + mobile;
+  }
+
+  function renderDeclRules(opts = {}) {
+    const rules = DECLENSION_REFERENCE.rules_of_thumb || [];
+    const colsClass = opts.compact ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2';
+    return `
+      <div class="mb-4">
+        <h3 class="text-base font-extrabold mb-2">Faustregeln</h3>
+        <div class="grid gap-3 ${colsClass}">
+          ${rules.map(r => `
+            <div class="rounded-2xl bg-amber-50 border border-amber-200 p-4">
+              <div class="font-bold italic text-amber-900 mb-1">${escapeHtml(r.title)}</div>
+              <div class="text-sm text-amber-900/90">${escapeHtml(r.text)}</div>
+            </div>`).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  function renderDeclensionRef(opts = {}) {
+    const ref = DECLENSION_REFERENCE;
+    const compact = !!opts.overlay; // slide-over → compact (single-column) layout
+    const inner = `
+      <div class="text-xs uppercase tracking-wider font-bold text-purple-700">Referenz</div>
+      <h2 class="text-2xl font-extrabold mt-1 mb-1">${escapeHtml(ref.title)}</h2>
+      <p class="text-sm text-neutral-600 mb-5">${escapeHtml(ref.subtitle)}</p>
+      ${renderDeclLegend()}
+      ${renderDeclSummaryTables({ compact })}
+      ${renderDeclMatrix({ compact })}
+      ${renderDeclRules({ compact })}
+    `;
+    if (opts.overlay) return inner;
+    return `${renderRefHeader('decl')}<main class="anim-in">${inner}</main>`;
+  }
+
+  // Mini-cell snippet, used inside the Adjektiv-Endungen drill on wrong/hard answers
+  function renderDeclMiniCell(item) {
+    const c = declCase(item), g = declGender(item), patId = declPatternFor(item);
+    const row = getDeclCellRow(c, g, patId);
+    if (!row) return '';
+    const pat = DECL_PATTERNS.find(p => p.id === patId);
+    const tint = GENDER_TINTS[g];
+    const labelMap = { def:'mit Artikel (Tab. 2)', zero:'ohne Artikel (Tab. 1)', ein:'mit ein/kein/poss.' };
+    return `
+      <div class="rounded-xl ${tint.soft} border-l-4 ${tint.border} border-y border-r border-neutral-200 px-3 py-2 mt-3 anim-hint">
+        <div class="flex flex-wrap gap-1 mb-1">
+          <span class="text-[10px] uppercase tracking-wider font-bold ${tint.med} ${tint.text} rounded px-1.5 py-0.5">${escapeHtml(DECL_LABELS[c])} · ${escapeHtml(DECL_LABELS[g])}</span>
+          <span class="text-[10px] uppercase tracking-wider font-bold ${pat.cls} rounded px-1.5 py-0.5">${escapeHtml(labelMap[patId])}</span>
+        </div>
+        <div class="text-sm font-semibold">${escapeHtml(row.ending)} → <span class="font-bold">${escapeHtml(row.phrase)}</span></div>
+        <div class="text-xs text-neutral-700 italic mt-0.5">${escapeHtml(row.sentence)}</div>
+      </div>
+    `;
+  }
+
+  // ============================================================
+  //  Schreiben + Sprechen home views
+  // ============================================================
+  function renderSchreibenHome() {
+    const cards = SCHREIBEN_REDEMITTEL.map(t => {
+      const list = listVorlagen('schreiben', t.id);
+      const examples = list.filter(v => v.isExample).length;
+      const own = list.length - examples;
+      return `
+        <button data-action="open-editor" data-area="schreiben" data-task="${t.id}"
+                class="anim-in text-left rounded-2xl bg-white border border-neutral-200 hover:border-emerald-400 transition p-5 w-full">
+          <div class="flex items-baseline gap-2 mb-1">
+            <span class="text-xl">${escapeHtml(t.icon)}</span>
+            <div class="font-extrabold text-base">${escapeHtml(t.title)}</div>
+          </div>
+          <div class="text-xs text-neutral-500 mb-2">${escapeHtml(t.subtitle)}</div>
+          <div class="text-sm text-neutral-700 mb-3">${escapeHtml(t.description)}</div>
+          <div class="text-[11px] text-neutral-500">
+            <strong>${list.length}</strong> Vorlagen${examples > 0 ? ` <span class="text-emerald-700">· ${examples} Beispiel${examples>1?'e':''}</span>` : ''}${own > 0 ? ` · ${own} eigene` : ''}
+          </div>
+        </button>
+      `;
+    }).join('');
+
+    return `
+      <header class="pt-5 pb-4">
+        <div class="flex items-center gap-3">
+          <button data-action="open-section" data-section="section-editors"
+                  class="rounded-full w-9 h-9 flex items-center justify-center bg-white border border-neutral-200 hover:bg-neutral-50 transition" aria-label="Back">
+            <span class="text-lg leading-none">←</span>
+          </button>
+          <div>
+            <div class="text-[11px] text-neutral-500 uppercase tracking-wider font-semibold">Editor</div>
+            <div class="text-sm font-semibold">Schreiben</div>
+          </div>
+        </div>
+      </header>
+      <main class="anim-in"><div class="grid gap-3">${cards}</div></main>
+    `;
+  }
+
+  function renderSprechenHome() {
+    const cards = SPRECHEN_REDEMITTEL.map(t => {
+      const list = listVorlagen('sprechen', t.id);
+      const examples = list.filter(v => v.isExample).length;
+      const own = list.length - examples;
+      return `
+        <button data-action="open-editor" data-area="sprechen" data-task="${t.id}"
+                class="anim-in text-left rounded-2xl bg-white border border-neutral-200 hover:border-blue-400 transition p-5 w-full">
+          <div class="flex items-baseline gap-2 mb-1">
+            <span class="text-xl">${escapeHtml(t.icon)}</span>
+            <div class="font-extrabold text-base">${escapeHtml(t.title)}</div>
+          </div>
+          <div class="text-xs text-neutral-500 mb-2">${escapeHtml(t.subtitle)}</div>
+          <div class="text-sm text-neutral-700 mb-3">${escapeHtml(t.description)}</div>
+          <div class="text-[11px] text-neutral-500">
+            <strong>${list.length}</strong> Vorlagen${examples > 0 ? ` <span class="text-blue-700">· ${examples} Beispiel${examples>1?'e':''}</span>` : ''}${own > 0 ? ` · ${own} eigene` : ''}
+          </div>
+        </button>
+      `;
+    }).join('');
+
+    return `
+      <header class="pt-5 pb-4">
+        <div class="flex items-center gap-3">
+          <button data-action="open-section" data-section="section-editors"
+                  class="rounded-full w-9 h-9 flex items-center justify-center bg-white border border-neutral-200 hover:bg-neutral-50 transition" aria-label="Back">
+            <span class="text-lg leading-none">←</span>
+          </button>
+          <div>
+            <div class="text-[11px] text-neutral-500 uppercase tracking-wider font-semibold">Editor</div>
+            <div class="text-sm font-semibold">Sprechen</div>
+          </div>
+        </div>
+      </header>
+      <main class="anim-in"><div class="grid gap-3">${cards}</div></main>
+    `;
+  }
+
+  // ============================================================
+  //  Editor view (Schreiben + Sprechen)
+  // ============================================================
+  function renderRedemittelSidebar(sectionsData, opts = {}) {
+    const e = state.editor;
+    const expanded = e.expandedSections || {};
+    // Default: first 2-3 expanded if no preferences yet
+    const defaultExpand = (i) => i < 3;
+    const filterTitles = opts.filterTitles; // optional whitelist
+    const visible = filterTitles ? sectionsData.filter(s => filterTitles.includes(s.title)) : sectionsData;
+    const items = visible.map((sec, i) => {
+      const isOpen = expanded[sec.title] !== undefined ? expanded[sec.title] : defaultExpand(i);
+      return `
+        <div class="border-b border-neutral-100 last:border-b-0">
+          <button data-action="toggle-section-rm" data-section-title="${escapeHtml(sec.title)}"
+                  class="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-neutral-50">
+            <span class="text-sm font-semibold">${escapeHtml(sec.title)}</span>
+            <span class="chevron ${isOpen ? '' : 'collapsed'} text-neutral-400 text-xs">▾</span>
+          </button>
+          ${isOpen ? `
+            <div class="px-2 pb-2">
+              ${sec.phrases.map(p => `
+                <button data-action="insert-phrase" data-phrase="${escapeHtml(p)}" class="phrase-chip">${escapeHtml(p)}</button>
+              `).join('')}
+            </div>` : ''}
+        </div>
+      `;
+    }).join('');
+    const heightClass = opts.tall
+      ? 'max-h-[60vh] sm:max-h-[70vh] lg:max-h-[calc(100vh-9rem)]'
+      : 'max-h-[60vh] sm:max-h-[70vh]';
+    return `
+      <aside class="bg-white border border-neutral-200 rounded-2xl overflow-hidden flex flex-col">
+        <div class="px-3 py-2 bg-neutral-50 border-b border-neutral-200 shrink-0">
+          <div class="text-[11px] uppercase tracking-wider font-bold text-neutral-500">Redemittel</div>
+          ${opts.titleHint ? `<div class="text-xs text-neutral-700">${escapeHtml(opts.titleHint)}</div>` : ''}
+        </div>
+        <div class="${heightClass} overflow-y-auto">${items}</div>
+      </aside>
+    `;
+  }
+
+  function renderEditorTopBar(titleText, subText) {
+    const e = state.editor;
+    const v = listVorlagen(e.area, e.taskId);
+    return `
+      <header class="pt-5 pb-3">
+        <div class="flex items-center gap-2">
+          <button data-action="close-editor"
+                  class="rounded-full w-9 h-9 flex items-center justify-center bg-white border border-neutral-200 hover:bg-neutral-50 transition" aria-label="Back">
+            <span class="text-lg leading-none">←</span>
+          </button>
+          <div class="flex-1 min-w-0">
+            <div class="text-[11px] text-neutral-500 uppercase tracking-wider font-semibold">${escapeHtml(subText)}</div>
+            <div class="text-sm font-semibold truncate">${escapeHtml(titleText)}</div>
+          </div>
+          <button data-action="open-vorlagen-overlay"
+                  class="text-xs font-semibold rounded-full bg-white border border-neutral-200 px-3 py-1.5 hover:bg-neutral-50">
+            📚 Vorlagen <span class="opacity-60">(${v.length})</span>
+          </button>
+          <button data-action="open-vorlesen"
+                  class="text-xs font-semibold rounded-full bg-white border border-neutral-200 px-3 py-1.5 hover:bg-neutral-50" title="Vorlesen-Modus">
+            👁 Vorlesen
+          </button>
+        </div>
+      </header>
+    `;
+  }
+
+  function renderEditorActionRow(extraButtons = '') {
+    return `
+      <div class="flex flex-wrap gap-2 mt-3">
+        <button data-action="save-vorlage"
+                class="text-sm font-semibold rounded-xl bg-flag-ink text-white px-3 py-2 hover:bg-neutral-800">💾 Speichern als Vorlage</button>
+        <button data-action="new-draft"
+                class="text-sm font-semibold rounded-xl bg-white border-2 border-neutral-200 px-3 py-2 hover:bg-neutral-50">＋ Neuer Entwurf</button>
+        <button data-action="export-current"
+                class="text-sm font-semibold rounded-xl bg-white border-2 border-neutral-200 px-3 py-2 hover:bg-neutral-50">📋 Kopieren</button>
+        ${extraButtons}
+      </div>
+    `;
+  }
+
+  function renderSchreibenEditor() {
+    const e = state.editor;
+    const task = getSchreibenTask(e.taskId);
+    if (!task) { state.view = 'hub'; return renderHub(); }
+
+    return `
+      ${renderEditorTopBar(task.title, 'Schreiben')}
+      <main class="anim-in">
+        <div class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_24rem] lg:items-start">
+          <div>
+            <input type="text" data-field="title" placeholder="Betreff / Titel (optional)"
+                   value="${escapeHtml(e.title)}"
+                   class="w-full px-3 py-2 mb-3 rounded-xl border-2 border-neutral-200 text-sm font-semibold focus:border-flag-ink transition" />
+            <textarea id="editor-body" data-field="body" data-slide-idx="0"
+                      class="editor-textarea js-editor-area lg:min-h-[calc(100vh-18rem)]" rows="14"
+                      placeholder="${escapeHtml(task.description)}">${escapeHtml(e.body)}</textarea>
+            <div class="flex items-center justify-between text-xs text-neutral-500 mt-1.5">
+              <span>${wordCount(e.body)} Wörter${e.body.length ? ` · ${e.body.length} Zeichen` : ''}</span>
+              ${e.loadedVorlageId ? `<span class="text-emerald-700">aus Vorlage geladen</span>` : ''}
+            </div>
+            ${renderEditorActionRow()}
+          </div>
+          <div class="lg:sticky lg:top-4">
+            <button data-action="toggle-mobile-sidebar"
+                    class="lg:hidden w-full mb-2 text-sm font-semibold rounded-xl bg-white border-2 border-neutral-200 px-3 py-2">
+              ${e.sidebarOpenMobile ? 'Redemittel ausblenden ▴' : 'Redemittel anzeigen ▾'}
+            </button>
+            <div class="${e.sidebarOpenMobile ? '' : 'hidden lg:block'}">
+              ${renderRedemittelSidebar(task.sections, { titleHint: task.subtitle, tall: true })}
+            </div>
+          </div>
+        </div>
+      </main>
+    `;
+  }
+
+  function renderSprechenPlanningEditor() {
+    const e = state.editor;
+    const task = getSprechenTask('planning');
+    if (!task) { state.view = 'hub'; return renderHub(); }
+    const scenarios = task.practice_scenarios || [];
+
+    return `
+      ${renderEditorTopBar(task.title, 'Sprechen Teil 2')}
+      <main class="anim-in">
+        <div class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_24rem] lg:items-start">
+          <div>
+            <div class="flex gap-2 mb-3">
+              <select data-field="scenario"
+                      class="flex-1 px-3 py-2 rounded-xl border-2 border-neutral-200 text-sm focus:border-flag-ink">
+                <option value="">Wähle ein Szenario zum Üben aus…</option>
+                ${scenarios.map(s => `<option value="${escapeHtml(s)}" ${e.scenario === s ? 'selected' : ''}>${escapeHtml(s.length > 80 ? s.slice(0,77) + '…' : s)}</option>`).join('')}
+              </select>
+              <button data-action="insert-scenario"
+                      class="text-sm font-semibold rounded-xl bg-flag-ink text-white px-3 py-2 hover:bg-neutral-800">Einfügen</button>
+            </div>
+            <textarea id="editor-body" data-field="body" data-slide-idx="0"
+                      class="editor-textarea js-editor-area lg:min-h-[calc(100vh-18rem)]" rows="16"
+                      placeholder="Schreibe einen Dialog: A: … / B: …">${escapeHtml(e.body)}</textarea>
+            <div class="flex items-center justify-between text-xs text-neutral-500 mt-1.5">
+              <span>${wordCount(e.body)} Wörter</span>
+              ${e.loadedVorlageId ? `<span class="text-emerald-700">aus Vorlage geladen</span>` : ''}
+            </div>
+            ${renderEditorActionRow()}
+          </div>
+          <div class="lg:sticky lg:top-4">
+            <button data-action="toggle-mobile-sidebar"
+                    class="lg:hidden w-full mb-2 text-sm font-semibold rounded-xl bg-white border-2 border-neutral-200 px-3 py-2">
+              ${e.sidebarOpenMobile ? 'Redemittel ausblenden ▴' : 'Redemittel anzeigen ▾'}
+            </button>
+            <div class="${e.sidebarOpenMobile ? '' : 'hidden lg:block'}">
+              ${renderRedemittelSidebar(task.sections, { titleHint: task.subtitle, tall: true })}
+            </div>
+          </div>
+        </div>
+      </main>
+    `;
+  }
+
+  function renderSprechenPresentationEditor() {
+    const e = state.editor;
+    const task = getSprechenTask('presentation');
+    if (!task) { state.view = 'hub'; return renderHub(); }
+    const topics = task.practice_topics || [];
+
+    const slidesHtml = PRES_SLIDE_TITLES.map((title, i) => {
+      const body = (e.slides && e.slides[i]) || '';
+      const sectionTitle = PRES_SECTION_FOR_SLIDE[i];
+      const sec = task.sections.find(s => s.title === sectionTitle);
+      return `
+        <div class="rounded-2xl bg-white border border-neutral-200 p-3 mb-3 ${e.lastFocusedSlide === i ? 'ring-2 ring-flag-gold' : ''}">
+          <div class="flex items-baseline justify-between mb-1.5">
+            <div class="text-[11px] uppercase tracking-wider font-bold text-blue-700">${escapeHtml(title)}</div>
+            <div class="text-[11px] text-neutral-500">${wordCount(body)} Wörter</div>
+          </div>
+          <textarea data-field="slide" data-slide-idx="${i}"
+                    class="editor-textarea js-editor-area" rows="5"
+                    placeholder="…">${escapeHtml(body)}</textarea>
+          ${sec ? `
+            <details class="mt-1.5">
+              <summary class="text-[11px] text-neutral-500 cursor-pointer">Phrasen für diese Folie ▾</summary>
+              <div class="mt-1.5">
+                ${sec.phrases.map(p => `<button data-action="insert-phrase-into" data-phrase="${escapeHtml(p)}" data-slide-idx="${i}" class="phrase-chip">${escapeHtml(p)}</button>`).join('')}
+              </div>
+            </details>` : ''}
+        </div>
+      `;
+    }).join('');
+
+    const generalSections = task.sections.filter(s => PRES_GENERAL_SECTIONS.includes(s.title));
+
+    return `
+      ${renderEditorTopBar(task.title, 'Sprechen Teil 3')}
+      <main class="anim-in">
+        <div class="flex gap-2 mb-3">
+          <select data-field="topic"
+                  class="flex-1 px-3 py-2 rounded-xl border-2 border-neutral-200 text-sm focus:border-flag-ink">
+            <option value="">Wähle ein Thema (oder eigenes eintippen)</option>
+            ${topics.map(tp => `<option value="${escapeHtml(tp)}" ${e.topic === tp ? 'selected' : ''}>${escapeHtml(tp)}</option>`).join('')}
+          </select>
+          <input type="text" data-field="topic" placeholder="Thema"
+                 value="${escapeHtml(e.topic)}"
+                 class="flex-1 px-3 py-2 rounded-xl border-2 border-neutral-200 text-sm focus:border-flag-ink" />
+        </div>
+        ${slidesHtml}
+        ${generalSections.length ? `
+          <details class="rounded-2xl bg-white border border-neutral-200 p-3 mb-3">
+            <summary class="text-sm font-semibold cursor-pointer">Übergänge & Antworten auf Fragen</summary>
+            <div class="mt-2">
+              ${generalSections.map(sec => `
+                <div class="mb-2">
+                  <div class="text-[11px] uppercase tracking-wider font-bold text-neutral-500 mb-1">${escapeHtml(sec.title)}</div>
+                  <div>${sec.phrases.map(p => `<button data-action="insert-phrase-into" data-phrase="${escapeHtml(p)}" class="phrase-chip">${escapeHtml(p)}</button>`).join('')}</div>
+                </div>`).join('')}
+            </div>
+          </details>` : ''}
+        ${renderEditorActionRow()}
+      </main>
+    `;
+  }
+
+  // ============================================================
+  //  Vorlagen library overlay
+  // ============================================================
+  function renderVorlagenOverlay() {
+    const o = state.overlay;
+    if (!o || typeof o !== 'object' || o.type !== 'vorlagen') return '';
+    const list = listVorlagen(o.area, o.taskId);
+    const taskTitle = o.area === 'schreiben'
+      ? (getSchreibenTask(o.taskId) || {}).title
+      : (getSprechenTask(o.taskId)  || {}).title;
+
+    const cards = list.length === 0
+      ? '<div class="text-sm text-neutral-500 text-center py-8">Noch keine Vorlagen.</div>'
+      : list.map(v => {
+          const body = (o.taskId === 'presentation' && v.slides && v.slides.length === 5)
+            ? v.slides.join('\n\n')
+            : v.body || '';
+          return `
+            <div class="rounded-xl border ${v.isExample ? 'border-emerald-200 bg-emerald-50' : 'border-neutral-200 bg-white'} p-3 mb-2">
+              <div class="flex items-baseline justify-between gap-2">
+                <div class="font-bold text-sm">${escapeHtml(v.name)}${v.isExample ? ' <span class="text-[10px] uppercase tracking-wider font-bold text-emerald-700 ml-1">Beispiel</span>' : ''}</div>
+                <div class="text-[10px] text-neutral-500 shrink-0">${escapeHtml(fmtDate(v.savedAt))}</div>
+              </div>
+              <div class="text-xs text-neutral-600 mt-1 line-clamp-3">${escapeHtml(snippet(body, 160))}</div>
+              <div class="flex flex-wrap gap-1.5 mt-2">
+                <button data-action="load-vorlage" data-id="${escapeHtml(v.id)}"
+                        class="text-xs font-semibold rounded-lg bg-flag-ink text-white px-2.5 py-1 hover:bg-neutral-800">Laden</button>
+                ${v.isExample ? `
+                  <button data-action="copy-vorlage" data-id="${escapeHtml(v.id)}"
+                          class="text-xs font-semibold rounded-lg bg-white border-2 border-neutral-200 px-2.5 py-1 hover:bg-neutral-50">Kopie erstellen</button>
+                ` : `
+                  <button data-action="delete-vorlage" data-id="${escapeHtml(v.id)}"
+                          class="text-xs font-semibold rounded-lg bg-white border-2 border-red-200 text-flag-red px-2.5 py-1 hover:bg-red-50">Löschen</button>
+                `}
+              </div>
+            </div>
+          `;
+        }).join('');
+
+    return `
+      <div class="fixed inset-0 z-50 anim-bg-in">
+        <div data-action="close-overlay" class="absolute inset-0 bg-black/40"></div>
+        <aside class="absolute right-0 top-0 bottom-0 w-full sm:w-[28rem] lg:w-[34rem] bg-paper shadow-xl overflow-y-auto anim-slidein-right">
+          <div class="sticky top-0 flex items-center justify-between bg-white border-b border-neutral-200 px-4 py-3">
+            <div>
+              <div class="text-[11px] uppercase tracking-wider font-bold text-neutral-500">Vorlagen</div>
+              <div class="font-bold">${escapeHtml(taskTitle || '')}</div>
+            </div>
+            <button data-action="close-overlay" class="rounded-full w-8 h-8 flex items-center justify-center hover:bg-neutral-100">
+              <span class="text-lg leading-none">×</span>
+            </button>
+          </div>
+          <div class="px-3 py-3">
+            ${cards}
+          </div>
+        </aside>
+      </div>
+    `;
+  }
+
+  // ============================================================
+  //  Vorlesen view
+  // ============================================================
+  let vorlesenTimerId = null, vorlesenStartedAt = 0;
+  function buildVorlesenText() {
+    const e = state.editor;
+    if (!e) return '';
+    if (e.area === 'schreiben') {
+      return (e.title ? e.title + '\n\n' : '') + (e.body || '');
+    }
+    if (e.taskId === 'planning') {
+      return (e.scenario ? 'Szenario: ' + e.scenario + '\n\n' : '') + (e.body || '');
+    }
+    // presentation
+    const parts = [];
+    if (e.topic) parts.push('Thema: ' + e.topic);
+    PRES_SLIDE_TITLES.forEach((title, i) => {
+      const body = e.slides[i] || '';
+      if (body.trim()) parts.push(title + '\n' + body);
+    });
+    return parts.join('\n\n');
+  }
+  function ttsAvailable() {
+    return typeof window !== 'undefined' && 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
+  }
+  function renderVorlesen() {
+    const text = buildVorlesenText();
+    const tts = ttsAvailable();
+    return `
+      <div class="fixed inset-0 z-40 bg-flag-ink text-white overflow-y-auto" data-action="close-vorlesen">
+        <div class="sticky top-0 flex items-center gap-2 bg-flag-ink/90 backdrop-blur px-4 py-3 border-b border-white/10">
+          <button data-action="close-vorlesen" class="rounded-full w-9 h-9 flex items-center justify-center bg-white/10 hover:bg-white/20">
+            <span class="text-lg leading-none">×</span>
+          </button>
+          <div class="text-[11px] uppercase tracking-wider font-bold text-flag-gold">Vorlesen</div>
+          <div id="vorlesen-timer" class="ml-auto font-mono tabular-nums text-base">0:00</div>
+          ${tts ? `
+            <button data-action="speak-all"
+                    class="text-xs font-semibold rounded-full bg-flag-gold text-flag-ink px-3 py-1.5">🔊 Hör es</button>
+            <button data-action="speak-stop"
+                    class="text-xs font-semibold rounded-full bg-white/10 text-white px-3 py-1.5">Stop</button>` : ''}
+        </div>
+        <div class="px-6 py-10 cursor-pointer" data-action="close-vorlesen">
+          <div class="vorlesen-text">${escapeHtml(text) || '<span class="opacity-60">(noch nichts geschrieben)</span>'}</div>
+          <div class="text-center text-white/40 text-xs mt-12">tippen zum Beenden</div>
+        </div>
+      </div>
+    `;
+  }
+  function startVorlesenTimer() {
+    vorlesenStartedAt = Date.now();
+    if (vorlesenTimerId) clearInterval(vorlesenTimerId);
+    vorlesenTimerId = setInterval(() => {
+      const sec = Math.floor((Date.now() - vorlesenStartedAt) / 1000);
+      const m = Math.floor(sec / 60), s = sec % 60;
+      const el = document.getElementById('vorlesen-timer');
+      if (el) el.textContent = `${m}:${String(s).padStart(2,'0')}`;
+    }, 1000);
+  }
+  function stopVorlesenTimer() {
+    if (vorlesenTimerId) { clearInterval(vorlesenTimerId); vorlesenTimerId = null; }
+    if (ttsAvailable()) { try { window.speechSynthesis.cancel(); } catch {} }
+  }
+  function speakText(text) {
+    if (!ttsAvailable()) return;
+    try {
+      window.speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(text);
+      const voices = window.speechSynthesis.getVoices() || [];
+      const de = voices.find(v => v.lang && v.lang.toLowerCase().startsWith('de'));
+      if (de) utter.voice = de;
+      utter.lang = 'de-DE';
+      utter.rate = 0.9;
+      window.speechSynthesis.speak(utter);
+    } catch {}
+  }
+
+  // ============================================================
+  //  Export Vorlagen as Markdown
+  // ============================================================
+  function buildVorlagenMarkdown() {
+    const s = loadState();
+    let md = '# B1 Trainer — Vorlagen Export\n\n';
+    md += `_Exported ${new Date().toLocaleString()}_\n\n`;
+    SCHREIBEN_REDEMITTEL.forEach(t => {
+      md += `## Schreiben · ${t.title}\n\n`;
+      const list = (s.schreiben_vorlagen[t.id] || []);
+      if (!list.length) { md += '_(keine Vorlagen)_\n\n'; return; }
+      list.forEach(v => {
+        md += `### ${v.name}${v.isExample ? ' _(Beispiel)_' : ''}\n\n${v.body}\n\n---\n\n`;
+      });
+    });
+    SPRECHEN_REDEMITTEL.forEach(t => {
+      md += `## Sprechen · ${t.title}\n\n`;
+      const list = (s.sprechen_vorlagen[t.id] || []);
+      if (!list.length) { md += '_(keine Vorlagen)_\n\n'; return; }
+      list.forEach(v => {
+        md += `### ${v.name}${v.isExample ? ' _(Beispiel)_' : ''}\n\n`;
+        if (t.id === 'presentation' && v.slides && v.slides.length === 5) {
+          if (v.topic) md += `**Thema:** ${v.topic}\n\n`;
+          PRES_SLIDE_TITLES.forEach((title, i) => {
+            md += `**${title}**\n\n${v.slides[i] || ''}\n\n`;
+          });
+        } else {
+          md += `${v.body}\n\n`;
+        }
+        md += '---\n\n';
+      });
+    });
+    return md;
+  }
+  function downloadFile(filename, content, type = 'text/markdown;charset=utf-8') {
+    const blob = new Blob([content], { type });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click();
+    setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+  }
+
+  // ---- Slide-over overlay (rendered separately on top of view) ----
+  function renderOverlay() {
+    if (!state.overlay) return '';
+    if (typeof state.overlay === 'object' && state.overlay.type === 'vorlagen') {
+      return renderVorlagenOverlay();
+    }
+    let title = '', body = '';
+    if (state.overlay === 'verb-position') {
+      title = 'Verb-Position';
+      body = renderVerbPositionRef({ overlay: true });
+    } else if (state.overlay === 'article-patterns') {
+      title = 'Artikel-Patterns';
+      body = renderArticlePatternsRef({ overlay: true });
+    } else if (state.overlay === 'declension') {
+      title = 'Deklination';
+      body = renderDeclensionRef({ overlay: true });
+    } else {
+      return '';
+    }
+    return `
+      <div class="fixed inset-0 z-50 anim-bg-in">
+        <div data-action="close-overlay" class="absolute inset-0 bg-black/40"></div>
+        <aside class="absolute right-0 top-0 bottom-0 w-full sm:w-[28rem] lg:w-[34rem] bg-paper shadow-xl overflow-y-auto anim-slidein-right">
+          <div class="sticky top-0 flex items-center justify-between bg-white border-b border-neutral-200 px-4 py-3">
+            <div class="font-bold">${escapeHtml(title)}</div>
+            <button data-action="close-overlay"
+                    class="rounded-full w-8 h-8 flex items-center justify-center hover:bg-neutral-100">
+              <span class="text-lg leading-none">×</span>
+            </button>
+          </div>
+          <div class="px-4 py-4">${body}</div>
+        </aside>
+      </div>
+    `;
+  }
+
+  // ============================================================
+  //  Render
+  // ============================================================
+  function render() {
+    const root = document.getElementById('app');
+    const isEditor = state.view === 'schreiben-editor' || state.view === 'sprechen-editor';
+    const isWideView = isEditor || state.view === 'reference-decl';
+    root.className = (isWideView ? 'max-w-6xl' : 'max-w-2xl') + ' mx-auto px-4 pb-24';
+    if (isSectionView(state.view)) recordLastSection(state.view);
+    let main = '';
+    if (state.view === 'dashboard' || state.view === 'hub') main = renderHub();
+    else if (state.view === 'section-vokabeln')    main = renderSectionVokabeln();
+    else if (state.view === 'section-grammatik')   main = renderSectionGrammatik();
+    else if (state.view === 'section-editors')     main = renderSectionEditors();
+    else if (state.view === 'section-referenz')    main = renderSectionReferenz();
+    else if (state.view === 'reset-confirm')       main = renderResetConfirm();
+    else if (state.view === 'habensein-mode')      main = renderHabenSeinModeSelect();
+    else if (state.view === 'reference-verb')      main = renderVerbPositionRef();
+    else if (state.view === 'reference-article')   main = renderArticlePatternsRef();
+    else if (state.view === 'reference-decl')      main = renderDeclensionRef();
+    else if (state.view === 'schreiben-home')      main = renderSchreibenHome();
+    else if (state.view === 'sprechen-home')       main = renderSprechenHome();
+    else if (state.view === 'schreiben-editor')    main = renderSchreibenEditor();
+    else if (state.view === 'sprechen-editor') {
+      const e = state.editor;
+      main = (e && e.taskId === 'presentation') ? renderSprechenPresentationEditor() : renderSprechenPlanningEditor();
+    }
+    else if (state.view === 'vorlesen')            main = renderVorlesen();
+    else if (state.view === 'session') {
+      const s = state.session;
+      if (!s) { state.view = 'hub'; render(); return; }
+      if (s.type === 'habensein-blitz' && s.idx < s.cards.length && !s.blitz.ended) {
+        main = renderHabenSeinBlitzCard(s.cards[s.idx]);
+      } else {
+        main = renderSession();
+      }
+    }
+    else if (state.view === 'blitz-results') main = renderBlitzResults();
+    root.innerHTML = main + renderOverlay();
+    afterRender();
+    if (state.view === 'vorlesen') startVorlesenTimer();
+    else if (vorlesenTimerId) stopVorlesenTimer();
+    state.navDir = null; // reset after render so subsequent renders default to forward
+  }
+
+  // boot
+  migrate();
+  seedSampleVorlagen();
+  state.view = bootView();
+  const required = [
+    ['LESSONS', typeof LESSONS],
+    ['NEBENSATZ_ITEMS', typeof NEBENSATZ_ITEMS],
+    ['HABEN_SEIN_ITEMS', typeof HABEN_SEIN_ITEMS],
+    ['KONJUNKTIV_ITEMS', typeof KONJUNKTIV_ITEMS],
+    ['ADJECTIVE_ITEMS', typeof ADJECTIVE_ITEMS],
+    ['PRAEPOSITION_LOKAL_ITEMS', typeof PRAEPOSITION_LOKAL_ITEMS],
+    ['VERB_PRAEP_ITEMS', typeof VERB_PRAEP_ITEMS],
+    ['MODAL_PERFEKT_ITEMS', typeof MODAL_PERFEKT_ITEMS],
+    ['RELATIV_ITEMS', typeof RELATIV_ITEMS],
+    ['VERB_POSITION_REFERENCE', typeof VERB_POSITION_REFERENCE],
+    ['ARTICLE_PATTERNS_REFERENCE', typeof ARTICLE_PATTERNS_REFERENCE],
+    ['DECLENSION_REFERENCE', typeof DECLENSION_REFERENCE],
+    ['SCHREIBEN_REDEMITTEL', typeof SCHREIBEN_REDEMITTEL],
+    ['SPRECHEN_REDEMITTEL', typeof SPRECHEN_REDEMITTEL],
+  ];
+  const missing = required.filter(([n, t]) => t === 'undefined').map(([n]) => n);
+  if (missing.length) {
+    document.getElementById('app').innerHTML =
+      `<div class="text-red-700 p-6 font-semibold">Data files failed to load: <code>${missing.join(', ')}</code>. Make sure all *_data.js files are next to index.html and the page is served (not opened via file://).</div>`;
+  } else {
+    render();
+  }
+  </script>
+</body>
+</html>
