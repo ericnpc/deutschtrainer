@@ -2040,9 +2040,40 @@ A: Bis Samstag, ich freue mich!`,
     const last = (getUIPrefs().last_section) || 'hub';
     return { idx:0, stats:{ correct:0, partial:0, wrong:0, future:0 }, streak:0, exitTo: last, ...extras };
   }
+  function shuffleArray(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+  // Shuffle but never end up matching the correct order verbatim.
+  function shuffledTokens(tokens, correct) {
+    if (!tokens || tokens.length <= 1) return (tokens || []).slice();
+    const matches = (arr) => correct && arr.length === correct.length && arr.every((t, i) => t === correct[i]);
+    let attempts = 0;
+    let candidate = shuffleArray(tokens);
+    while (matches(candidate) && attempts < 10) {
+      candidate = shuffleArray(tokens);
+      attempts++;
+    }
+    if (matches(candidate)) {
+      // last-ditch deterministic disturbance: swap first two
+      [candidate[0], candidate[1]] = [candidate[1], candidate[0]];
+    }
+    return candidate;
+  }
+
   function initDraftForCard(card) {
     if (!card) return {};
-    if (card.kind === 'nebensatz') return { pool: card.item.tokens.slice(), build: [], userOrder: [] };
+    if (card.kind === 'nebensatz') {
+      return {
+        pool:  shuffledTokens(card.item.tokens, card.item.correct_order),
+        build: [],
+        userOrder: [],
+      };
+    }
     if (card.kind === 'vocab' || card.kind === 'habensein') return {};
     // fill-in card
     const answers = card.item.answers || [];
