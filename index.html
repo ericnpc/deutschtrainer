@@ -888,12 +888,16 @@ A: Bis Samstag, ich freue mich!`,
 
     const footer = `
       <div class="text-center mt-8 space-y-2">
-        <div class="flex justify-center gap-3 text-xs">
+        <div class="flex justify-center flex-wrap gap-x-3 gap-y-1 text-xs">
+          <button data-action="export-progress" class="text-neutral-500 hover:text-flag-ink underline underline-offset-2">Export Progress (JSON)</button>
+          <span class="text-neutral-300">·</span>
+          <button data-action="import-progress" class="text-neutral-500 hover:text-flag-ink underline underline-offset-2">Import Progress</button>
+          <span class="text-neutral-300">·</span>
           <button data-action="export-vorlagen" class="text-neutral-400 hover:text-flag-ink underline underline-offset-2">Export Vorlagen (Markdown)</button>
           <span class="text-neutral-300">·</span>
           <button data-action="confirm-reset" class="text-neutral-400 hover:text-flag-red underline underline-offset-2">Reset all progress</button>
         </div>
-        <p class="text-[11px] text-neutral-400">Progress saved locally · single device</p>
+        <p class="text-[11px] text-neutral-400">Progress saved locally · move between devices via Export/Import</p>
       </div>
     `;
 
@@ -2724,6 +2728,8 @@ A: Bis Samstag, ich freue mich!`,
         showToast('Markdown heruntergeladen');
         break;
       }
+      case 'export-progress':  exportProgress(); break;
+      case 'import-progress':  triggerImportPicker(); break;
     }
   });
 
@@ -3902,6 +3908,99 @@ A: Bis Samstag, ich freue mich!`,
     a.href = url; a.download = filename;
     document.body.appendChild(a); a.click();
     setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+  }
+
+  // ============================================================
+  //  Full progress export / import (JSON)
+  // ============================================================
+  function progressSummary(s) {
+    const counts = {};
+    ['vocab','nebensatz','habenSein','konjunktiv','adjective','praepLokal','verbPraep','modalPerfekt','relativ'].forEach(k => {
+      counts[k] = Object.keys(s[k] || {}).length;
+    });
+    let vorlagen = 0;
+    ['informal','formal','forum'].forEach(t => vorlagen += (s.schreiben_vorlagen && s.schreiben_vorlagen[t] || []).length);
+    ['planning','presentation'].forEach(t => vorlagen += (s.sprechen_vorlagen && s.sprechen_vorlagen[t] || []).length);
+    let drafts = 0;
+    ['informal','formal','forum'].forEach(t => { if (s.schreiben_drafts && s.schreiben_drafts[t]) drafts++; });
+    ['planning','presentation'].forEach(t => { if (s.sprechen_drafts && s.sprechen_drafts[t]) drafts++; });
+    const items = Object.values(counts).reduce((a,b) => a+b, 0);
+    return {
+      itemsTracked: items,
+      counts, vorlagen, drafts,
+      streak: (s.meta && s.meta.streak) || 0,
+      lastSessionDate: (s.meta && s.meta.lastSessionDate) || null,
+    };
+  }
+
+  function exportProgress() {
+    const s = loadState();
+    const data = {
+      __format: 'b1trainer-progress',
+      __version: 1,
+      __exportedAt: new Date().toISOString(),
+      summary: progressSummary(s),
+      state: s,
+    };
+    const stamp = new Date().toISOString().slice(0,10);
+    downloadFile(`b1trainer-progress-${stamp}.json`, JSON.stringify(data, null, 2), 'application/json;charset=utf-8');
+    showToast('Fortschritt exportiert');
+  }
+
+  function importProgressFromFile(file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      let parsed;
+      try { parsed = JSON.parse(e.target.result); }
+      catch { showToast('Datei ist kein gültiges JSON'); return; }
+      // Accept both wrapped {state: {...}} and bare-state shapes
+      const incoming = (parsed && parsed.state && typeof parsed.state === 'object') ? parsed.state : parsed;
+      if (!incoming || typeof incoming !== 'object') { showToast('Datei sieht nicht wie ein Backup aus'); return; }
+      const expected = ['vocab','nebensatz','habenSein','konjunktiv','adjective','praepLokal','verbPraep','modalPerfekt','relativ','schreiben_vorlagen','sprechen_vorlagen','meta'];
+      const hasExpected = expected.some(k => k in incoming);
+      if (!hasExpected) { showToast('Backup unvollständig – Import abgebrochen'); return; }
+
+      const summary = progressSummary({ ...emptyState(), ...incoming, meta: { ...emptyState().meta, ...(incoming.meta || {}) } });
+      const msg = `Diese Datei ersetzt deinen aktuellen Fortschritt:
+
+• ${summary.itemsTracked} verfolgte Karten
+• ${summary.vorlagen} Vorlagen, ${summary.drafts} Entwürfe
+• Streak: ${summary.streak}${summary.lastSessionDate ? ` (zuletzt ${summary.lastSessionDate})` : ''}
+
+Fortfahren?`;
+      if (!window.confirm(msg)) return;
+
+      // Merge with fresh defaults so any new buckets added in newer versions stay sane
+      const base = emptyState();
+      const merged = { ...base, ...incoming };
+      merged.meta = { ...base.meta, ...(incoming.meta || {}) };
+      merged.ui_prefs = { ...base.ui_prefs, ...(incoming.ui_prefs || {}) };
+      saveState(merged);
+      // Drop any in-flight session/editor state — file shouldn't dictate UI
+      state.session = null; state.editor = null; state.overlay = null; state.cardPhase = 'question'; state.feedback = null; state.draft = {};
+      state.view = 'hub';
+      showToast('Fortschritt importiert');
+      render();
+    };
+    reader.readAsText(file);
+  }
+
+  function triggerImportPicker() {
+    let input = document.getElementById('import-progress-input');
+    if (!input) {
+      input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json,application/json';
+      input.id = 'import-progress-input';
+      input.style.display = 'none';
+      input.addEventListener('change', (ev) => {
+        const f = ev.target.files && ev.target.files[0];
+        if (f) importProgressFromFile(f);
+        input.value = '';
+      });
+      document.body.appendChild(input);
+    }
+    input.click();
   }
 
   // ---- Slide-over overlay (rendered separately on top of view) ----
