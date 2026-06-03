@@ -30,11 +30,27 @@ python -m http.server 8000
 # then open http://localhost:8000
 ```
 
-(Tailwind and Sortable.js are loaded from CDN, so an internet connection is required on first load.)
+Everything is local — Tailwind and Sortable.js are vendored under `vendor/`, so the app works fully offline after the first load.
+
+## Offline / install as a PWA
+
+The app ships with a service worker (`sw.js`) and a web app manifest (`manifest.webmanifest`). On first visit, every asset (HTML, vendored JS, all `*_data.js` data files, icons) is pre-cached, and subsequent loads serve from cache. The service worker only runs over `http(s)://` — opening `file://` falls back to plain mode.
+
+### Install on iPhone
+
+1. Open the deployed site in Safari.
+2. Tap the share icon → **Zum Home-Bildschirm**.
+3. Launch from the home-screen icon — runs full-screen, works in airplane mode, and `localStorage` becomes durable (Safari otherwise evicts unused-site storage after ~7 days).
+
+A small hint banner reminding you to do this appears at the top of the hub on iOS Safari until dismissed.
+
+### Install on Android / Chrome / Edge
+
+You'll get a native "Install app" prompt from the browser. Same offline behaviour.
 
 ## Deploy to GitHub Pages
 
-1. Push the project files (`index.html`, `README.md`, plus all `*_data.js` data files) to a GitHub repo on the `main` branch.
+1. Push the project files to a GitHub repo on the `main` branch: `index.html`, `manifest.webmanifest`, `sw.js`, the three icon PNGs, the `vendor/` directory, all `*_data.js` data files, and `README.md`.
 2. In the repo: **Settings → Pages**.
 3. Under **Build and deployment**, set **Source** to *Deploy from a branch*.
 4. Select **Branch: `main`** and **Folder: `/ (root)`**, then **Save**.
