@@ -2,7 +2,7 @@
 
 A single-page, no-build B1 German trainer covering vocabulary, grammar, reference, and exam composition (Schreiben + Sprechen).
 
-The dashboard is a 4-card hub: **Vokabeln**, **Grammatik**, **Schreiben & Sprechen**, **Referenz**. Each card opens a section view; the back arrow returns to the hub. Last-visited section is restored on refresh within 30 minutes.
+The dashboard is a 5-card hub: **Vokabeln**, **Grammatik**, **Redemittel**, **Schreiben & Sprechen**, **Referenz**. Each card opens a section view; the back arrow returns to the hub. Last-visited section is restored on refresh within 30 minutes.
 
 - **Vokabeln** — 20 themed lessons. Learn (German → English) and Drill (English → German with article).
 - **Nebensatz** — drag word tokens into the right verb-final order.
@@ -13,8 +13,9 @@ The dashboard is a 4-card hub: **Vokabeln**, **Grammatik**, **Schreiben & Sprech
 - **Verb + Präposition** — fixed verb+preposition pairs (denken an, warten auf, sich freuen über/auf …).
 - **Modal · Perfekt** — the double-infinitive pattern in Hauptsatz and Nebensatz.
 - **Relativsätze** — relative pronouns across Nom/Akk/Dat/Gen including dessen/deren.
-- **Mixed Review** — pulls due cards across vocab + all 8 grammar modules in one session.
-- **Referenz** — three non-drilled study cards: *Verb-Position* (Nebensatz / Hauptsatz / Inversion comparison), *Artikel-Patterns* (der/die/das suffix rules + exceptions + compound rule), and *Deklination* (4×4 case×gender matrix with three article patterns per cell + summary tables + faustregeln). Callable inline from drills as slide-overs: vocab noun Drill → Artikel-Patterns; Nebensatz Drill → Verb-Position; Adjektiv-Endungen Drill → Deklination, with a contextual mini-cell tip pulled from the matrix that matches the missed item's case + gender + table.
+- **Redemittel** — 5 themed sets of fixed exam phrases: three written (freundschaftliche E-Mail, höfliche E-Mail, Meinung äußern) plus two spoken (Gemeinsam etwas planen, Präsentation — folded in from the Sprechen Redemittel). Gap-fill (Lückentext) drill: type the one missing word in each memorised phrase. Same SM-2 spacing as everything else, and its due cards join Mixed Review. The spoken phrase text is single-sourced from `sprechen_redemittel.js`; `redemittel_data.js` only adds the blank-word choices.
+- **Mixed Review** — pulls due cards across vocab + all 8 grammar modules + Redemittel in one session.
+- **Referenz** — four non-drilled study cards: *Verb-Position* (Nebensatz / Hauptsatz / Inversion comparison), *Artikel-Patterns* (der/die/das suffix rules + exceptions + compound rule), *Deklination* (4×4 case×gender matrix with three article patterns per cell + summary tables + faustregeln), and *Redemittel* (every fixed phrase listed by theme and section — the lookup companion to the Redemittel drill). Callable inline from drills as slide-overs: vocab noun Drill → Artikel-Patterns; Nebensatz Drill → Verb-Position; Adjektiv-Endungen Drill → Deklination, with a contextual mini-cell tip pulled from the matrix that matches the missed item's case + gender + table.
 - **Schreiben editor** — Brief / E-Mail / Forum task types with auto-saved drafts, Redemittel sidebar (tap a phrase to insert at cursor), Vorlagen library (per-task saved templates with seeded B1 examples).
 - **Sprechen editor** — Teil 2 (Gemeinsam etwas planen, scenario chooser) and Teil 3 (Präsentation, 5 slides with per-slide Redemittel toolbars). Vorlesen mode with a timer and optional speech-synthesis playback if the browser supports `de-DE`.
 - **Export** — bundle all Vorlagen across both editors into a single Markdown download from the dashboard footer.
@@ -50,7 +51,7 @@ You'll get a native "Install app" prompt from the browser. Same offline behaviou
 
 ## Deploy to GitHub Pages
 
-1. Push the project files to a GitHub repo on the `main` branch: `index.html`, `manifest.webmanifest`, `sw.js`, the three icon PNGs, the `vendor/` directory, all `*_data.js` data files, and `README.md`.
+1. Push the project files to a GitHub repo on the `main` branch: `index.html`, `manifest.webmanifest`, `sw.js`, the three icon PNGs, the `vendor/` directory, all `*_data.js` data files (including `redemittel_data.js`), and `README.md`.
 2. In the repo: **Settings → Pages**.
 3. Under **Build and deployment**, set **Source** to *Deploy from a branch*.
 4. Select **Branch: `main`** and **Folder: `/ (root)`**, then **Save**.
@@ -95,6 +96,6 @@ localStorage.removeItem('b1trainer_state');
 - **Vocab Drill / Mixed Review**: `Enter` to check / continue
 - **Nebensatz**: drag tokens or tap to move · `Enter` to check (when build slot is full)
 - **haben/sein** (Practice & Blitz): `1` for left button · `2` for right button · `Enter` to continue
-- **Konjunktiv II / Adjektiv / Präpositionen / Verb+Präp / Modal·Perfekt / Relativsätze**: `Tab` between blanks · `Enter` to check
+- **Konjunktiv II / Adjektiv / Präpositionen / Verb+Präp / Modal·Perfekt / Relativsätze / Redemittel**: `Tab` between blanks · `Enter` to check
 - **Reference slide-over** (in noun Drill / Nebensatz Drill): `Esc` closes
 - **Editors**: drafts auto-save 1s after typing stops · `Esc` closes the Vorlagen library

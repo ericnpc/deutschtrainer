@@ -262,6 +262,7 @@
   <script src="declension_ref.js"></script>
   <script src="schreiben_redemittel.js"></script>
   <script src="sprechen_redemittel.js"></script>
+  <script src="redemittel_data.js"></script>
   <script>
   // ============================================================
   //  Storage
@@ -277,7 +278,7 @@
   function emptyState() {
     return {
       vocab:{}, nebensatz:{}, habenSein:{}, konjunktiv:{},
-      adjective:{}, praepLokal:{}, verbPraep:{}, modalPerfekt:{}, relativ:{},
+      adjective:{}, praepLokal:{}, verbPraep:{}, modalPerfekt:{}, relativ:{}, redemittel:{},
       schreiben_drafts: { informal:null, formal:null, forum:null },
       schreiben_vorlagen: { informal:[], formal:[], forum:[] },
       sprechen_drafts: { planning:null, presentation:null },
@@ -348,7 +349,7 @@
   function getUIPrefs() { return loadState().ui_prefs || { last_section: null, last_section_timestamp: 0 }; }
   function setUIPrefs(p) { const s = loadState(); s.ui_prefs = p; saveState(s); }
   const LAST_SECTION_TTL = 30 * 60 * 1000;
-  const SECTION_VIEWS = ['hub','section-vokabeln','section-grammatik','section-editors','section-referenz'];
+  const SECTION_VIEWS = ['hub','section-vokabeln','section-grammatik','section-redemittel','section-editors','section-referenz'];
   function isSectionView(v) { return SECTION_VIEWS.includes(v); }
   function recordLastSection(view) {
     if (!isSectionView(view)) return;
@@ -683,6 +684,10 @@ A: Bis Samstag, ich freue mich!`,
         if (s.reps > 0 && s.due <= Date.now()) n++;
       });
     });
+    REDEMITTEL_LESSONS.forEach(l => l.items.forEach(it => {
+      const s = getItemState('redemittel', it.id);
+      if (s.reps > 0 && s.due <= Date.now()) n++;
+    }));
     return n;
   }
   function totalSeenCount() {
@@ -691,6 +696,7 @@ A: Bis Samstag, ich freue mich!`,
     GRAMMAR_MODULES.forEach(m => {
       moduleItems(m.kind).forEach(it => { if (getItemState(m.type, it.id).reps > 0) n++; });
     });
+    REDEMITTEL_LESSONS.forEach(l => l.items.forEach(it => { if (getItemState('redemittel', it.id).reps > 0) n++; }));
     return n;
   }
 
@@ -713,6 +719,14 @@ A: Bis Samstag, ich freue mich!`,
     const fut  = cards.filter(c => c.state.reps > 0 && c.state.due >  Date.now()).sort((a,b) => a.state.due - b.state.due);
     return [...news, ...due, ...fut].slice(0, size);
   }
+  function pickRedemittelSession(lessonIdx, size = SESSION_SIZE) {
+    const lesson = REDEMITTEL_LESSONS[lessonIdx];
+    const cards = lesson.items.map(it => ({ kind:'redemittel', item:it, lesson, state:getItemState('redemittel', it.id) }));
+    const news = cards.filter(c => c.state.reps === 0);
+    const due  = cards.filter(c => c.state.reps > 0 && c.state.due <= Date.now()).sort((a,b) => a.state.due - b.state.due);
+    const fut  = cards.filter(c => c.state.reps > 0 && c.state.due >  Date.now()).sort((a,b) => a.state.due - b.state.due);
+    return [...news, ...due, ...fut].slice(0, size);
+  }
   function pickMixedReview(size = REVIEW_SIZE) {
     const cards = [];
     LESSONS.forEach(lesson => lesson.words.forEach(w => {
@@ -725,6 +739,10 @@ A: Bis Samstag, ich freue mich!`,
         if (st.reps > 0 && st.due <= Date.now()) cards.push({ kind:m.kind, item:it, state:st });
       });
     });
+    REDEMITTEL_LESSONS.forEach(lesson => lesson.items.forEach(it => {
+      const st = getItemState('redemittel', it.id);
+      if (st.reps > 0 && st.due <= Date.now()) cards.push({ kind:'redemittel', item:it, state:st });
+    }));
     cards.sort((a,b) => a.state.due - b.state.due);
     return cards.slice(0, size);
   }
@@ -733,6 +751,10 @@ A: Bis Samstag, ich freue mich!`,
     if (s.type === 'vocab-learn' || s.type === 'vocab-drill') {
       const lesson = LESSONS[s.lessonIdx];
       return Math.max(0, lesson.words.length - s.idx);
+    }
+    if (s.type === 'redemittel') {
+      const lesson = REDEMITTEL_LESSONS[s.lessonIdx];
+      return Math.max(0, lesson.items.length - s.idx);
     }
     if (s.type === 'habensein-blitz') return 0;
     if (s.type === 'habensein-practice') return Math.max(0, HABEN_SEIN_ITEMS.length - s.idx);
@@ -836,6 +858,11 @@ A: Bis Samstag, ich freue mich!`,
     });
     return total ? Math.round(seen / total * 100) : 0;
   }
+  function totalRedemittelSeenPct() {
+    let total = 0, seen = 0;
+    REDEMITTEL_LESSONS.forEach(l => { total += l.items.length; l.items.forEach(it => { if (getItemState('redemittel', it.id).reps > 0) seen++; }); });
+    return total ? Math.round(seen / total * 100) : 0;
+  }
   function totalVorlagenCount() {
     const s = loadState();
     let n = 0;
@@ -852,6 +879,7 @@ A: Bis Samstag, ich freue mich!`,
     const dueAll = totalDueCount();
     const vPct = totalVocabSeenPct();
     const gPct = totalGrammarSeenPct();
+    const rPct = totalRedemittelSeenPct();
     const vorl = totalVorlagenCount();
 
     const dueHero = dueAll > 0 ? `
@@ -888,8 +916,9 @@ A: Bis Samstag, ich freue mich!`,
       <div class="flex flex-col gap-3">
         ${card('section-vokabeln',   '📚', 'Vokabeln',                 `${LESSONS.length} Lektionen · ${vPct}% gesehen`, 'flag-red')}
         ${card('section-grammatik',  '🧱', 'Grammatik',                `${GRAMMAR_MODULES.length} Module · ${gPct}% gesehen`, 'amber')}
+        ${card('section-redemittel', '🗣️', 'Redemittel',               `${REDEMITTEL_LESSONS.length} Themen · Lückentext · ${rPct}% gesehen`, 'teal')}
         ${card('section-editors',    '✍️', 'Schreiben & Sprechen',     `2 Editoren · ${vorl} gespeicherte Vorlagen`, 'emerald')}
-        ${card('section-referenz',   '📖', 'Referenz',                 `3 Karten zum Nachschlagen`, 'indigo')}
+        ${card('section-referenz',   '📖', 'Referenz',                 `4 Karten zum Nachschlagen`, 'indigo')}
       </div>
     `;
 
@@ -991,6 +1020,44 @@ A: Bis Samstag, ich freue mich!`,
          + `<main class="${pageAnim()}">${grid}</main>`;
   }
 
+  function renderSectionRedemittel() {
+    const grid = `
+      <div class="grid gap-3 sm:grid-cols-2">
+        ${REDEMITTEL_LESSONS.map((lesson, idx) => {
+          const stats = moduleStats('redemittel', lesson.items);
+          return `
+            <div class="rounded-2xl bg-white border border-neutral-200 p-4 hover:border-teal-300 transition">
+              <div class="flex items-start justify-between mb-2">
+                <div class="min-w-0 flex items-center gap-2">
+                  <span class="text-xl shrink-0 leading-none">${escapeHtml(lesson.icon)}</span>
+                  <div class="min-w-0">
+                    <div class="text-xs text-neutral-400 font-medium">Thema ${lesson.lesson}${lesson.speaking ? ' · Sprechen' : ''}</div>
+                    <div class="font-bold text-base leading-snug truncate">${escapeHtml(lesson.title)}</div>
+                  </div>
+                </div>
+                ${stats.due > 0 ? `<span class="shrink-0 ml-2 text-xs font-bold bg-flag-red text-white rounded-full px-2 py-0.5">${stats.due} due</span>` : ''}
+              </div>
+              <div class="h-2 bg-neutral-100 rounded-full overflow-hidden mb-1">
+                <div class="h-full bg-flag-ink progress-bar" style="width:${stats.strength}%"></div>
+              </div>
+              <div class="text-[11px] text-neutral-500 mb-3">${stats.seen}/${stats.total} seen${stats.accuracy != null ? ` · ${stats.accuracy}% acc` : ''}</div>
+              <button data-action="start-redemittel" data-lesson="${idx}"
+                      class="w-full py-2 rounded-xl bg-flag-ink text-white font-bold hover:bg-neutral-800 transition">Lückentext üben</button>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+    return renderSectionHeader('Redemittel', `${REDEMITTEL_LESSONS.length} Themen · Lückentext`)
+         + `<main class="${pageAnim()}">${grid}`
+         + `<button data-action="open-reference" data-ref="redemittel"
+                    class="mt-4 w-full text-left rounded-2xl bg-white border border-neutral-200 hover:border-teal-300 transition p-4">
+              <div class="text-[11px] uppercase tracking-wider font-bold text-teal-700 mb-1">Referenz</div>
+              <div class="font-bold text-base mb-1">Alle Redemittel nachschlagen</div>
+              <div class="text-xs text-neutral-500">Vollständige Phrasen-Liste nach Thema &amp; Abschnitt.</div>
+            </button></main>`;
+  }
+
   function renderSectionEditors() {
     const schreibenCards = SCHREIBEN_REDEMITTEL.map(t => {
       const list = listVorlagen('schreiben', t.id);
@@ -1035,7 +1102,7 @@ A: Bis Samstag, ich freue mich!`,
   }
 
   function renderSectionReferenz() {
-    return renderSectionHeader('Referenz', '3 Karten zum Nachschlagen') + `
+    return renderSectionHeader('Referenz', '4 Karten zum Nachschlagen') + `
       <main class="${pageAnim()}">
         <div class="grid gap-3 sm:grid-cols-2">
           <button data-action="open-reference" data-ref="verb-position"
@@ -1055,6 +1122,12 @@ A: Bis Samstag, ich freue mich!`,
             <div class="text-[11px] uppercase tracking-wider font-bold text-purple-700 mb-1">Deklination</div>
             <div class="font-bold text-base mb-1">Adjektiv-Endungen für alle Kasus & Genera</div>
             <div class="text-xs text-neutral-500">4×4-Matrix mit drei Mustern pro Zelle, Übersichtstabellen, 5-en-Regel & Co.</div>
+          </button>
+          <button data-action="open-reference" data-ref="redemittel"
+                  class="text-left rounded-2xl bg-white border border-neutral-200 hover:border-teal-300 transition p-4 sm:col-span-2">
+            <div class="text-[11px] uppercase tracking-wider font-bold text-teal-700 mb-1">Redemittel</div>
+            <div class="font-bold text-base mb-1">Feste Phrasen für E-Mail, Meinung & Sprechen</div>
+            <div class="text-xs text-neutral-500">E-Mail, Meinung äußern, Planen & Präsentation — nach Abschnitt geordnet.</div>
           </button>
         </div>
       </main>
@@ -1086,6 +1159,7 @@ A: Bis Samstag, ich freue mich!`,
       'habensein-practice':'haben/sein · Practice','habensein-blitz':'haben/sein · Blitz',
       'adjective':'Adjektiv-Endungen','praepLokal':'Präpositionen lokal',
       'verbPraep':'Verb + Präposition','modalPerfekt':'Modal · Perfekt','relativ':'Relativsätze',
+      'redemittel':'Redemittel · Lückentext',
     })[t] || t;
   }
 
@@ -1132,6 +1206,7 @@ A: Bis Samstag, ich freue mich!`,
     else if (card.kind === 'verbPraep')    body = renderVerbPraepCard(card);
     else if (card.kind === 'modalPerfekt') body = renderModalPerfektCard(card);
     else if (card.kind === 'relativ')      body = renderRelativCard(card);
+    else if (card.kind === 'redemittel')   body = renderRedemittelCard(card);
     return renderSessionHeader() + body;
   }
 
@@ -2042,6 +2117,55 @@ A: Bis Samstag, ich freue mich!`,
   // ============================================================
   //  Session lifecycle
   // ============================================================
+  // ----------- Redemittel card (gap-fill) -----------
+  function renderRedemittelCard(card) {
+    const it = card.item;
+    const phase = state.cardPhase;
+    const showLessonTag = state.session.type === 'mixed-review';
+    const fb = state.feedback;
+    const blanks = state.draft.blanks || it.answers.map(()=> '');
+    const blankFlags = state.draft.blankFlags || it.answers.map(()=> null);
+    const scaffoldHtml = renderScaffoldInputs(it.scaffold, it.alternatives, blanks, blankFlags, phase);
+
+    let feedbackBlock = '';
+    if (phase === 'feedback' && fb) {
+      const toneBg = feedbackToneClasses(fb.tone);
+      const animClass = fb.tone === 'green' ? 'anim-pop' : 'anim-shake';
+      const wrongDetails = fillInWrongDetails(it, blanks, blankFlags);
+      feedbackBlock = `
+        <div class="${animClass} mt-5 rounded-2xl border-2 ${toneBg} px-4 py-4">
+          <div class="font-bold text-base mb-2">${fb.label}</div>
+          ${wrongDetails}
+          ${fb.kind !== 'correct' ? `
+            <div class="mt-3 rounded-xl bg-white/70 border border-current/20 px-3 py-2 text-sm anim-hint">
+              <span class="font-bold uppercase text-[10px] tracking-wider mr-1">Ganzer Satz</span>${escapeHtml(it.full)}
+            </div>` : ''}
+        </div>
+        <button data-action="generic-continue" id="drill-continue"
+                class="mt-5 w-full py-4 rounded-2xl bg-flag-ink text-white font-bold text-lg hover:bg-neutral-800 transition">
+          Continue <span class="text-flag-gold/80 text-xs ml-2 font-medium">enter</span>
+        </button>`;
+    }
+
+    return `
+      <main class="anim-slide" key="${it.id}">
+        <form id="fill-form">
+          <div class="bg-white rounded-3xl border border-neutral-200 p-6 sm:p-8 shadow-sm">
+            ${showLessonTag ? `<div class="text-[11px] text-neutral-400 font-medium mb-2">Redemittel · ${escapeHtml(it.category)}</div>` : ''}
+            <div class="text-[11px] uppercase tracking-wider font-semibold text-teal-700 mb-2">${escapeHtml(it.category)} · ${escapeHtml(it.section)}</div>
+            <div class="text-lg sm:text-xl font-semibold leading-relaxed">${scaffoldHtml}</div>
+            ${phase === 'question' ? `
+              <button type="submit" class="mt-6 w-full py-4 rounded-2xl bg-flag-ink text-white font-bold text-lg hover:bg-neutral-800 transition">
+                Check <span class="text-flag-gold/80 text-xs ml-2 font-medium">enter</span>
+              </button>` : ''}
+            ${feedbackBlock}
+          </div>
+        </form>
+        <p class="text-center text-[11px] text-neutral-400 mt-4">Tippe das fehlende Wort · enter to check</p>
+      </main>
+    `;
+  }
+
   function freshSession(extras) {
     // exitTo defaults to whichever section the user came from (last_section)
     const last = (getUIPrefs().last_section) || 'hub';
@@ -2103,6 +2227,15 @@ A: Bis Samstag, ich freue mich!`,
     state.cardPhase = 'question'; state.feedback = null; state.draft = {};
     state.view = 'session'; render();
   }
+  function startRedemittel(lessonIdx) {
+    const lesson = REDEMITTEL_LESSONS[lessonIdx];
+    const cards = pickRedemittelSession(lessonIdx, SESSION_SIZE);
+    if (!cards.length) { showToast('No cards available'); return; }
+    state.session = freshSession({ type:'redemittel', title:lesson.title, lessonIdx, cards });
+    state.cardPhase = 'question'; state.feedback = null;
+    state.draft = initDraftForCard(cards[0]);
+    state.view = 'session'; render();
+  }
   function startMixedReview() {
     const cards = pickMixedReview(REVIEW_SIZE);
     if (!cards.length) { showToast('Nothing due right now'); return; }
@@ -2147,6 +2280,7 @@ A: Bis Samstag, ich freue mich!`,
     if (s.type === 'mixed-review')                more = pickMixedReview(REVIEW_SIZE);
     else if (s.type === 'vocab-learn' || s.type === 'vocab-drill')
                                                   more = pickVocabSession(LESSONS[s.lessonIdx], SESSION_SIZE);
+    else if (s.type === 'redemittel')             more = pickRedemittelSession(s.lessonIdx, SESSION_SIZE);
     else if (s.type === 'habensein-practice')     more = pickGrammarSession('habensein', SESSION_SIZE);
     else if (moduleByKind(s.type))                more = pickGrammarSession(s.type, SESSION_SIZE);
     if (!more.length) { showToast('Nothing more to pull'); return; }
@@ -2416,6 +2550,7 @@ A: Bis Samstag, ich freue mich!`,
     switch (action) {
       case 'start-learn':            startVocabLearn(parseInt(t.dataset.lesson, 10)); break;
       case 'start-drill':            startVocabDrill(parseInt(t.dataset.lesson, 10)); break;
+      case 'start-redemittel':       startRedemittel(parseInt(t.dataset.lesson, 10)); break;
       case 'start-mixed':            startMixedReview(); break;
       case 'start-grammar':          startGrammar(t.dataset.kind); break;
       case 'open-habensein':         state.view = 'habensein-mode'; render(); break;
@@ -2447,6 +2582,7 @@ A: Bis Samstag, ich freue mich!`,
         if (r === 'verb-position')         state.view = 'reference-verb';
         else if (r === 'article-patterns') state.view = 'reference-article';
         else if (r === 'declension')       state.view = 'reference-decl';
+        else if (r === 'redemittel')       state.view = 'reference-redemittel';
         render();
         break;
       }
@@ -2887,7 +3023,7 @@ A: Bis Samstag, ich freue mich!`,
     }
 
     // Fill-in cards (Konjunktiv, Adjective, PraepLokal, VerbPraep, ModalPerfekt, Relativ)
-    const fillKinds = ['konjunktiv','adjective','praepLokal','verbPraep','modalPerfekt','relativ'];
+    const fillKinds = ['konjunktiv','adjective','praepLokal','verbPraep','modalPerfekt','relativ','redemittel'];
     if (fillKinds.includes(card.kind)) {
       if (state.cardPhase === 'feedback' && e.key === 'Enter') { e.preventDefault(); genericContinue(); return; }
     }
@@ -3199,8 +3335,48 @@ A: Bis Samstag, ich freue mich!`,
     `;
   }
 
+  function renderRedemittelRef(opts = {}) {
+    const accentColor = (a) => ({ 'flag-red':'red', blue:'blue', purple:'purple', emerald:'emerald', amber:'amber' }[a] || 'neutral');
+    const catBox = (cat) => {
+      const c = accentColor(cat.accent);
+      return `
+        <section class="rounded-2xl border-2 border-${c}-200 bg-${c}-50/40 p-4 mb-4">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="text-lg">${escapeHtml(cat.icon)}</span>
+            <h3 class="font-extrabold text-${c}-900 text-lg">${escapeHtml(cat.title)}</h3>
+            ${cat.speaking ? `<span class="text-[10px] uppercase tracking-wider font-bold text-${c}-700 bg-${c}-100 rounded-full px-2 py-0.5">Sprechen</span>` : ''}
+          </div>
+          <div class="space-y-3">
+            ${cat.sections.map(sec => `
+              <div>
+                <div class="text-[11px] uppercase tracking-wider font-bold text-${c}-700 mb-1">${escapeHtml(sec.title)}</div>
+                <ul class="space-y-1">
+                  ${sec.phrases.map(p => `
+                    <li class="text-sm text-neutral-800 flex gap-2">
+                      <span class="text-${c}-400 shrink-0">•</span><span>${escapeHtml(p)}</span>
+                    </li>`).join('')}
+                </ul>
+              </div>`).join('')}
+          </div>
+        </section>
+      `;
+    };
+
+    const inner = `
+      <div class="text-xs uppercase tracking-wider font-bold text-teal-700">Referenz</div>
+      <h2 class="text-2xl font-extrabold mt-1 mb-1">Redemittel (A2/B1)</h2>
+      <p class="text-sm text-neutral-600 mb-5">Feste Phrasen für E-Mails, Meinungsäußerung und das mündliche Prüfungsgespräch (Sprechen Teil 2 &amp; 3). Übe sie als Lückentext im Bereich <strong>Redemittel</strong>.</p>
+      ${REDEMITTEL_REF.map(catBox).join('')}
+    `;
+    if (opts.overlay) return inner;
+    return `
+      ${renderRefHeader('redemittel')}
+      <main class="anim-in">${inner}</main>
+    `;
+  }
+
   function renderRefHeader(kind) {
-    const titles = { verb:'Verb-Position', article:'Artikel-Patterns', decl:'Deklination' };
+    const titles = { verb:'Verb-Position', article:'Artikel-Patterns', decl:'Deklination', redemittel:'Redemittel' };
     return `
       <header class="pt-5 pb-4">
         <div class="flex items-center gap-3">
@@ -4091,6 +4267,7 @@ Fortfahren?`;
     if (state.view === 'dashboard' || state.view === 'hub') main = renderHub();
     else if (state.view === 'section-vokabeln')    main = renderSectionVokabeln();
     else if (state.view === 'section-grammatik')   main = renderSectionGrammatik();
+    else if (state.view === 'section-redemittel')  main = renderSectionRedemittel();
     else if (state.view === 'section-editors')     main = renderSectionEditors();
     else if (state.view === 'section-referenz')    main = renderSectionReferenz();
     else if (state.view === 'reset-confirm')       main = renderResetConfirm();
@@ -4098,6 +4275,7 @@ Fortfahren?`;
     else if (state.view === 'reference-verb')      main = renderVerbPositionRef();
     else if (state.view === 'reference-article')   main = renderArticlePatternsRef();
     else if (state.view === 'reference-decl')      main = renderDeclensionRef();
+    else if (state.view === 'reference-redemittel') main = renderRedemittelRef();
     else if (state.view === 'schreiben-home')      main = renderSchreibenHome();
     else if (state.view === 'sprechen-home')       main = renderSprechenHome();
     else if (state.view === 'schreiben-editor')    main = renderSchreibenEditor();
@@ -4182,6 +4360,8 @@ Fortfahren?`;
     ['DECLENSION_REFERENCE', typeof DECLENSION_REFERENCE],
     ['SCHREIBEN_REDEMITTEL', typeof SCHREIBEN_REDEMITTEL],
     ['SPRECHEN_REDEMITTEL', typeof SPRECHEN_REDEMITTEL],
+    ['REDEMITTEL_LESSONS', typeof REDEMITTEL_LESSONS],
+    ['REDEMITTEL_REF', typeof REDEMITTEL_REF],
   ];
   const missing = required.filter(([n, t]) => t === 'undefined').map(([n]) => n);
   if (missing.length) {
