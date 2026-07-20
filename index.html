@@ -263,6 +263,7 @@
   <script src="schreiben_redemittel.js"></script>
   <script src="sprechen_redemittel.js"></script>
   <script src="redemittel_data.js"></script>
+  <script src="daily_plan_data.js"></script>
   <script>
   // ============================================================
   //  Storage
@@ -349,7 +350,7 @@
   function getUIPrefs() { return loadState().ui_prefs || { last_section: null, last_section_timestamp: 0 }; }
   function setUIPrefs(p) { const s = loadState(); s.ui_prefs = p; saveState(s); }
   const LAST_SECTION_TTL = 30 * 60 * 1000;
-  const SECTION_VIEWS = ['hub','section-vokabeln','section-grammatik','section-redemittel','section-editors','section-referenz'];
+  const SECTION_VIEWS = ['hub','section-vokabeln','section-grammatik','section-redemittel','section-editors','section-referenz','vocab-list'];
   function isSectionView(v) { return SECTION_VIEWS.includes(v); }
   function recordLastSection(view) {
     if (!isSectionView(view)) return;
@@ -937,7 +938,7 @@ A: Bis Samstag, ich freue mich!`,
       </div>
     `;
 
-    return renderHeader() + renderIosInstallHint() + `<div class="${pageAnim()}">` + dueHero + cards + footer + `</div>`;
+    return renderHeader() + renderIosInstallHint() + `<div class="${pageAnim()}">` + dueHero + renderPlanGrid() + cards + footer + `</div>`;
   }
 
   function renderSectionHeader(title, subtitle) {
@@ -982,6 +983,8 @@ A: Bis Samstag, ich freue mich!`,
                 <button data-action="start-drill" data-lesson="${idx}"
                         class="flex-1 py-2 rounded-xl bg-flag-ink text-white font-bold hover:bg-neutral-800 transition">Drill</button>
               </div>
+              <button data-action="open-vocab-list" data-lesson="${idx}" data-back="section-vokabeln"
+                      class="w-full mt-2 py-1.5 rounded-xl border border-neutral-200 text-sm font-semibold text-neutral-600 hover:bg-neutral-50 transition">📖 Wortliste lesen</button>
             </div>
           `;
         }).join('')}
@@ -1134,6 +1137,323 @@ A: Bis Samstag, ich freue mich!`,
     `;
   }
 
+
+  // Lesson-index lookup by its printed lesson number (L1 → index in LESSONS)
+  function lessonIdxByNum(num) {
+    return LESSONS.findIndex(l => l.lesson === num);
+  }
+
+  // Read-only vocabulary list for a single lesson (no drilling)
+  function renderVocabList() {
+    const idx = state.vocabListLesson;
+    const lesson = LESSONS[idx];
+    const back = state.vocabListBack || 'section-vokabeln';
+    if (!lesson) {
+      return renderSectionHeader('Wortliste', '') + `<main class="${pageAnim()}"><p class="text-sm text-neutral-500">Lektion nicht gefunden.</p></main>`;
+    }
+    const rows = lesson.words.map(w => `
+      <div class="flex items-baseline gap-3 px-4 py-2.5 text-sm">
+        <div class="flex-1 min-w-0">
+          <span class="font-semibold text-flag-ink">${escapeHtml(w.german)}</span>
+          ${w.pos ? `<span class="ml-2 text-[10px] uppercase tracking-wider text-neutral-400">${escapeHtml(w.pos)}</span>` : ''}
+        </div>
+        <div class="flex-1 min-w-0 text-right text-neutral-600">${escapeHtml(w.english)}</div>
+      </div>
+    `).join('');
+    const header = `
+      <header class="pt-5 pb-4">
+        <div class="flex items-center gap-3">
+          <button data-action="open-section" data-section="${escapeHtml(back)}"
+                  class="rounded-full w-9 h-9 flex items-center justify-center bg-white border border-neutral-200 hover:bg-neutral-50 transition" aria-label="Zurück">
+            <span class="text-lg leading-none">←</span>
+          </button>
+          <div>
+            <div class="text-[11px] text-neutral-500 uppercase tracking-wider font-semibold">Lektion ${lesson.lesson} · Wortliste</div>
+            <div class="text-lg font-extrabold tracking-tight">${escapeHtml(lesson.title)}</div>
+            <div class="text-xs text-neutral-500">${lesson.words.length} Wörter</div>
+          </div>
+        </div>
+      </header>
+    `;
+    return header + `
+      <main class="${pageAnim()}">
+        <div class="rounded-2xl bg-white border border-neutral-200 overflow-hidden divide-y divide-neutral-100">
+          ${rows}
+        </div>
+        <div class="flex gap-2 mt-4">
+          <button data-action="start-learn" data-lesson="${idx}"
+                  class="flex-1 py-2 rounded-xl bg-flag-gold text-flag-ink font-bold hover:brightness-95 transition">Learn</button>
+          <button data-action="start-drill" data-lesson="${idx}"
+                  class="flex-1 py-2 rounded-xl bg-flag-ink text-white font-bold hover:bg-neutral-800 transition">Drill</button>
+        </div>
+      </main>
+    `;
+  }
+
+  // Link a plan day to its Vokabeln lesson reading list
+  function planVocabLink(d, back) {
+    const idx = lessonIdxByNum(d.lessonNum);
+    if (idx < 0) return '';
+    return `
+      <button data-action="open-vocab-list" data-lesson="${idx}" data-back="${back}"
+              class="w-full mt-4 py-2.5 rounded-xl border border-flag-gold/60 bg-flag-gold/10 text-sm font-semibold text-flag-ink hover:bg-flag-gold/20 transition flex items-center justify-center gap-2">
+        📖 Vokabeln lesen — Lektion ${d.lessonNum}: ${escapeHtml(LESSONS[idx].title)}
+      </button>
+    `;
+  }
+
+  // ---- 15-day plan: home grid ----
+  // Uses only classes with valid Tailwind shades (flag-* are flat, so bars use standard palette).
+  function planTileAccent(week) {
+    return ({
+      1: { bar: 'bg-rose-400',  hover: 'hover:border-rose-300'  },
+      2: { bar: 'bg-amber-400', hover: 'hover:border-amber-300' },
+      3: { bar: 'bg-teal-400',  hover: 'hover:border-teal-300'  },
+    })[week] || { bar: 'bg-neutral-400', hover: 'hover:border-neutral-300' };
+  }
+  function renderPlanGrid() {
+    const p = DAILY_PLAN;
+    const tiles = p.days.map((d, i) => {
+      const a = planTileAccent(d.week);
+      return `
+        <button data-action="open-plan-day" data-day="${i}"
+                class="hub-card relative overflow-hidden rounded-2xl bg-white border border-neutral-200 ${a.hover} p-2.5 flex flex-col items-center justify-start text-center min-h-[5.75rem]">
+          <span class="absolute left-0 top-0 bottom-0 w-1 ${a.bar}"></span>
+          <div class="text-2xl font-extrabold text-flag-ink leading-none mt-0.5">${d.n}</div>
+          <div class="text-[10px] leading-tight text-neutral-500 mt-1">${escapeHtml(d.tag)}</div>
+        </button>`;
+    }).join('');
+    return `
+      <section class="mb-8">
+        <div class="flex items-baseline justify-between mb-1">
+          <h2 class="text-xl font-extrabold tracking-tight">📅 15-Tage-Plan</h2>
+        </div>
+        <p class="text-xs text-neutral-500 mb-3">${escapeHtml(p.subtitle)} · tippe einen Tag an</p>
+        <div class="grid grid-cols-3 sm:grid-cols-5 gap-2.5">${tiles}</div>
+        ${renderPlanExtras()}
+      </section>
+    `;
+  }
+  function renderPlanExtras() {
+    const extras = (DAILY_PLAN.extras || [])
+      .map(e => ({ ...e, idx: lessonIdxByNum(e.num) }))
+      .filter(x => x.idx >= 0);
+    if (!extras.length) return '';
+    const tiles = extras.map((e, i) => `
+      <button data-action="open-vocab-list" data-lesson="${e.idx}" data-back="hub"
+              class="hub-card relative overflow-hidden rounded-2xl bg-white border border-neutral-200 hover:border-flag-gold p-2.5 flex flex-col items-center justify-start text-center min-h-[5.75rem]">
+        <span class="absolute left-0 top-0 bottom-0 w-1 bg-flag-gold"></span>
+        <div class="text-[9px] uppercase tracking-wider text-flag-gold font-bold mt-0.5">Extra</div>
+        <div class="text-2xl font-extrabold text-flag-ink leading-none">${i + 1}</div>
+        <div class="text-[10px] leading-tight text-neutral-500 mt-1">${escapeHtml(e.tag)}</div>
+      </button>`).join('');
+    return `
+      <div class="mt-7">
+        <h3 class="text-sm font-extrabold text-neutral-700 mb-1">🎯 Extra — bei Zeit frei einstreuen</h3>
+        <p class="text-xs text-neutral-500 mb-3">Nicht im Plan, aber nützlich, wann immer du willst.</p>
+        <div class="grid grid-cols-3 sm:grid-cols-5 gap-2.5">${tiles}</div>
+      </div>
+    `;
+  }
+
+  // ---- 15-day plan: "Kurz erklärt" rich block ----
+  function exampleTagClass(tag) {
+    if (tag === '✅' || tag === 'richtig') return 'bg-teal-100 text-teal-700';
+    if (tag === '❌' || tag === 'falsch') return 'bg-red-100 text-red-600';
+    return 'bg-indigo-100 text-indigo-700';
+  }
+  function renderErklaerung(e) {
+    let html = '';
+    if (e.lead) html += `<p class="text-[15px] leading-relaxed text-neutral-800">${e.lead}</p>`;
+    if (e.rules && e.rules.length) {
+      html += `<ul class="mt-3 space-y-1.5">${e.rules.map(r => `
+        <li class="flex gap-2 text-sm text-neutral-700"><span class="shrink-0 text-indigo-400 mt-0.5">▸</span><span>${r}</span></li>`).join('')}</ul>`;
+    }
+    if (e.examples && e.examples.length) {
+      html += `<div class="mt-3 flex flex-col gap-1.5">${e.examples.map(([tag, txt]) => `
+        <div class="flex items-baseline gap-2 text-sm">
+          <span class="shrink-0 text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${exampleTagClass(tag)}">${escapeHtml(tag)}</span>
+          <span class="text-neutral-700">${txt}</span>
+        </div>`).join('')}</div>`;
+    }
+    if (e.note) {
+      html += `<div class="mt-3 rounded-xl bg-white/70 border border-indigo-100 px-3 py-2 text-sm text-indigo-900 flex gap-2"><span class="shrink-0">💡</span><span>${e.note}</span></div>`;
+    }
+    return html;
+  }
+
+  // ---- 15-day plan: full-screen day view ----
+  function renderPlanDay() {
+    const i = state.planDay;
+    const d = DAILY_PLAN.days[i];
+    if (!d) { state.view = 'hub'; return renderHub(); }
+    const anim = state.navDir ? pageAnim() : '';
+    const weekTitle = (DAILY_PLAN.weekTitles || [])[d.week - 1] || '';
+    const prevBtn = i > 0
+      ? `<button data-action="plan-nav" data-day="${i - 1}" class="rounded-full w-9 h-9 flex items-center justify-center bg-white border border-neutral-200 hover:bg-neutral-50 transition" aria-label="Vorheriger Tag"><span class="text-lg leading-none">‹</span></button>`
+      : `<span class="w-9 h-9"></span>`;
+    const nextBtn = i < DAILY_PLAN.days.length - 1
+      ? `<button data-action="plan-nav" data-day="${i + 1}" class="rounded-full w-9 h-9 flex items-center justify-center bg-white border border-neutral-200 hover:bg-neutral-50 transition" aria-label="Nächster Tag"><span class="text-lg leading-none">›</span></button>`
+      : `<span class="w-9 h-9"></span>`;
+    const header = `
+      <header class="pt-5 pb-4 flex items-center gap-3">
+        <button data-action="back-to-hub"
+                class="rounded-full w-9 h-9 flex items-center justify-center bg-white border border-neutral-200 hover:bg-neutral-50 transition" aria-label="Startseite">
+          <span class="text-lg leading-none">←</span>
+        </button>
+        <div class="flex items-center gap-2.5 min-w-0 flex-1">
+          <div class="shrink-0 w-11 h-11 rounded-xl bg-flag-ink text-white flex flex-col items-center justify-center leading-none">
+            <span class="text-[9px] uppercase tracking-wider text-flag-gold font-semibold">Tag</span>
+            <span class="text-lg font-extrabold">${d.n}</span>
+          </div>
+          <div class="min-w-0">
+            <div class="text-[11px] text-neutral-500 uppercase tracking-wider font-semibold truncate">Woche ${d.week} · ${escapeHtml(weekTitle)}</div>
+            <div class="text-lg font-extrabold tracking-tight leading-tight">${escapeHtml(d.topic)}</div>
+          </div>
+        </div>
+        <div class="flex items-center gap-1.5">${prevBtn}${nextBtn}</div>
+      </header>
+    `;
+    const erkl = `
+      <div class="rounded-2xl bg-gradient-to-br from-indigo-50 to-sky-50 border border-indigo-100 p-4 sm:p-5">
+        <div class="text-[11px] uppercase tracking-wider font-bold text-indigo-500 mb-2 flex items-center gap-1.5"><span class="text-base">📖</span> Kurz erklärt</div>
+        ${renderErklaerung(d.erklaerung)}
+      </div>
+    `;
+    const exHeader = `
+      <div class="mt-6 mb-2 flex items-center gap-2">
+        <div class="text-sm font-extrabold text-neutral-700">✏️ Übungen</div>
+        <div class="text-[11px] text-neutral-400">${d.ex.length} Aufgaben</div>
+      </div>
+    `;
+    const exercises = d.ex.map((ex, idx) => renderPlanExercise(d.n, idx, ex)).join('');
+    return header + `
+      <main class="${anim}">
+        ${erkl}
+        ${planVocabLink(d, 'plan-day')}
+        ${exHeader}
+        <div class="flex flex-col gap-3">${exercises}</div>
+      </main>
+    `;
+  }
+
+  // ---- 15-day plan: interactive exercises ----
+  function planNorm(s) {
+    return String(s == null ? '' : s).trim().toLowerCase().replace(/\s+/g, ' ').replace(/[.,!?;:]+$/, '');
+  }
+  function planBlankOk(answer, val) {
+    const v = planNorm(val);
+    if (!v) return false;
+    const list = Array.isArray(answer) ? answer : [answer];
+    return list.some(x => planNorm(x) === v);
+  }
+  function planExState(key) {
+    if (!state.planEx) state.planEx = {};
+    return state.planEx[key] || (state.planEx[key] = {});
+  }
+  function snapshotPlanInputs() {
+    if (!state.planEx) state.planEx = {};
+    document.querySelectorAll('[data-plan-fill]').forEach(el => {
+      const st = planExState(el.dataset.key);
+      st.given = st.given || {};
+      st.given[el.dataset.blank] = el.value;
+    });
+    document.querySelectorAll('[data-plan-open]').forEach(el => {
+      planExState(el.dataset.key).text = el.value;
+    });
+  }
+  function renderPlanExercise(dayN, idx, ex) {
+    const key = `${dayN}.${idx}`;
+    const st = (state.planEx && state.planEx[key]) || {};
+    let typeLabel, body;
+    if (ex.t === 'fill')        { typeLabel = 'Lücke füllen';  body = renderFillEx(key, ex, st); }
+    else if (ex.t === 'choice') { typeLabel = 'Richtig wählen'; body = renderChoiceEx(key, ex, st); }
+    else                        { typeLabel = 'Freie Übung';    body = renderOpenEx(key, ex, st); }
+    return `
+      <div class="rounded-2xl bg-white border border-neutral-200 p-4">
+        <div class="flex items-center gap-2 mb-2.5">
+          <span class="shrink-0 w-6 h-6 rounded-full bg-flag-ink text-white text-xs font-bold flex items-center justify-center">${idx + 1}</span>
+          <span class="text-[11px] uppercase tracking-wider font-bold text-teal-600">${typeLabel}</span>
+        </div>
+        ${body}
+      </div>
+    `;
+  }
+  function renderFillEx(key, ex, st) {
+    const given = st.given || {};
+    const checked = !!st.checked;
+    const parts = ex.q.split('{b}');
+    let bi = 0;
+    let q = '<div class="text-[15px] leading-loose text-neutral-800">';
+    parts.forEach((part, pi) => {
+      q += part;
+      if (pi < parts.length - 1) {
+        const val = given[bi] != null ? given[bi] : '';
+        const ok = checked ? planBlankOk(ex.a[bi], val) : null;
+        const cls = checked
+          ? (ok ? 'border-teal-400 bg-teal-50 text-teal-800' : 'border-red-300 bg-red-50 text-red-700')
+          : 'border-neutral-300 focus:border-flag-ink';
+        q += `<input type="text" data-plan-fill data-key="${key}" data-blank="${bi}" value="${escapeHtml(val)}"
+                autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"
+                class="inline-block mx-1 px-2 py-0.5 w-32 align-baseline rounded-lg border-2 ${cls} text-center font-semibold outline-none">`;
+        bi++;
+      }
+    });
+    q += '</div>';
+    let result = '';
+    if (checked) {
+      const allOk = ex.a.every((a, k) => planBlankOk(a, given[k] || ''));
+      result += `<div class="mt-2.5 text-sm font-semibold ${allOk ? 'text-teal-700' : 'text-red-600'}">${allOk ? '✓ Richtig!' : '✗ Noch nicht ganz.'}</div>`;
+      if (!allOk) {
+        result += `<div class="mt-1 text-sm text-neutral-600">Lösung: ${ex.a.map(a => `<b>${escapeHtml(Array.isArray(a) ? a[0] : a)}</b>`).join(', ')}</div>`;
+      }
+      if (ex.tip) result += `<div class="mt-1 text-[13px] text-neutral-500">${ex.tip}</div>`;
+    }
+    const btn = `<button data-action="plan-check" data-key="${key}"
+                  class="mt-3 px-4 py-1.5 rounded-xl bg-flag-ink text-white text-sm font-bold hover:bg-neutral-800 transition">${checked ? 'Nochmal prüfen' : 'Prüfen'}</button>`;
+    return q + result + btn;
+  }
+  function renderChoiceEx(key, ex, st) {
+    const sel = st.selected;
+    const answered = sel != null;
+    let html = `<div class="text-[15px] leading-relaxed text-neutral-800 mb-3">${ex.q}</div><div class="flex flex-col gap-2">`;
+    ex.opts.forEach((opt, oi) => {
+      let cls = 'border-neutral-200 bg-white hover:border-flag-ink';
+      let mark = '';
+      if (answered) {
+        if (oi === ex.a) { cls = 'border-teal-400 bg-teal-50'; mark = '<span class="ml-auto text-teal-600 font-bold">✓</span>'; }
+        else if (oi === sel) { cls = 'border-red-300 bg-red-50'; mark = '<span class="ml-auto text-red-500 font-bold">✗</span>'; }
+        else { cls = 'border-neutral-200 bg-white opacity-50'; }
+      }
+      html += `<button ${answered ? 'disabled' : ''} data-action="plan-choose" data-key="${key}" data-opt="${oi}"
+                 class="flex items-center gap-2 text-left px-3 py-2 rounded-xl border-2 ${cls} transition text-sm font-medium text-neutral-800">${escapeHtml(opt)}${mark}</button>`;
+    });
+    html += '</div>';
+    if (answered) {
+      const ok = sel === ex.a;
+      html += `<div class="mt-2.5 text-sm font-semibold ${ok ? 'text-teal-700' : 'text-red-600'}">${ok ? '✓ Richtig!' : `✗ Richtig ist: „${escapeHtml(ex.opts[ex.a])}“`}</div>`;
+      if (ex.tip) html += `<div class="mt-1 text-[13px] text-neutral-500">${ex.tip}</div>`;
+      html += `<button data-action="plan-retry" data-key="${key}" class="mt-2 text-[13px] text-neutral-400 hover:text-flag-ink underline underline-offset-2">nochmal versuchen</button>`;
+    }
+    return html;
+  }
+  function renderOpenEx(key, ex, st) {
+    const revealed = !!st.revealed;
+    const text = st.text || '';
+    let html = `<div class="text-[15px] leading-relaxed text-neutral-800 mb-2">${ex.q}</div>`;
+    html += `<textarea data-plan-open data-key="${key}" rows="2" placeholder="Schreib deine Antwort … (optional)"
+               class="w-full px-3 py-2 rounded-xl border-2 border-neutral-200 focus:border-flag-ink outline-none text-sm resize-y">${escapeHtml(text)}</textarea>`;
+    html += `<button data-action="plan-reveal" data-key="${key}"
+               class="mt-2 px-4 py-1.5 rounded-xl ${revealed ? 'bg-neutral-100 text-neutral-600' : 'bg-flag-gold text-flag-ink'} text-sm font-bold hover:brightness-95 transition">${revealed ? 'Musterlösung ausblenden' : 'Musterlösung zeigen'}</button>`;
+    if (revealed) {
+      html += `<div class="mt-2 rounded-xl bg-teal-50 border border-teal-100 p-3 text-sm text-neutral-700">
+                 <div class="text-[11px] uppercase tracking-wider font-bold text-teal-600 mb-1">Musterlösung</div>
+                 <div class="leading-relaxed">${ex.sol.replace(/\n/g, '<br>')}</div>
+               </div>`;
+      if (ex.tip) html += `<div class="mt-1 text-[13px] text-neutral-500">${ex.tip}</div>`;
+    }
+    return html;
+  }
 
   function renderResetConfirm() {
     return `
@@ -2597,6 +2917,53 @@ A: Bis Samstag, ich freue mich!`,
       case 'open-section': {
         state.navDir = 'forward';
         state.view = t.dataset.section;
+        render();
+        break;
+      }
+      case 'open-vocab-list': {
+        state.navDir = 'forward';
+        state.vocabListLesson = parseInt(t.dataset.lesson, 10);
+        state.vocabListBack = t.dataset.back || 'section-vokabeln';
+        state.view = 'vocab-list';
+        render();
+        break;
+      }
+      case 'open-plan-day': {
+        state.navDir = 'forward';
+        state.planDay = parseInt(t.dataset.day, 10);
+        state.view = 'plan-day';
+        render();
+        break;
+      }
+      case 'plan-nav': {
+        snapshotPlanInputs();
+        state.navDir = 'forward';
+        state.planDay = parseInt(t.dataset.day, 10);
+        render();
+        break;
+      }
+      case 'plan-check': {
+        snapshotPlanInputs();
+        planExState(t.dataset.key).checked = true;
+        render();
+        break;
+      }
+      case 'plan-choose': {
+        snapshotPlanInputs();
+        planExState(t.dataset.key).selected = parseInt(t.dataset.opt, 10);
+        render();
+        break;
+      }
+      case 'plan-retry': {
+        snapshotPlanInputs();
+        delete planExState(t.dataset.key).selected;
+        render();
+        break;
+      }
+      case 'plan-reveal': {
+        snapshotPlanInputs();
+        const st = planExState(t.dataset.key);
+        st.revealed = !st.revealed;
         render();
         break;
       }
@@ -4270,6 +4637,8 @@ Fortfahren?`;
     else if (state.view === 'section-redemittel')  main = renderSectionRedemittel();
     else if (state.view === 'section-editors')     main = renderSectionEditors();
     else if (state.view === 'section-referenz')    main = renderSectionReferenz();
+    else if (state.view === 'plan-day')            main = renderPlanDay();
+    else if (state.view === 'vocab-list')          main = renderVocabList();
     else if (state.view === 'reset-confirm')       main = renderResetConfirm();
     else if (state.view === 'habensein-mode')      main = renderHabenSeinModeSelect();
     else if (state.view === 'reference-verb')      main = renderVerbPositionRef();

@@ -2,7 +2,7 @@
 // Cache-first for same-origin requests. Pre-caches every asset on install.
 // Bump CACHE_VERSION when shipping a change so clients pick it up cleanly.
 
-const CACHE_VERSION = 'b1trainer-v2';
+const CACHE_VERSION = 'b1trainer-v5';
 
 const PRECACHE = [
   './',
@@ -27,6 +27,7 @@ const PRECACHE = [
   './schreiben_redemittel.js',
   './sprechen_redemittel.js',
   './redemittel_data.js',
+  './daily_plan_data.js',
   // Icons
   './icon-180.png',
   './icon-192.png',
