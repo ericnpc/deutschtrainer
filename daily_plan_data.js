@@ -38,14 +38,14 @@ window.DAILY_PLAN = {
         note: "Nach <i>sein</i> / <i>werden</i> steht das Adjektiv <b>ohne Endung</b>: <i>Mein Chef ist großzügig.</i>"
       },
       ex: [
-        { t: 'fill', q: "ein {b} Freund <i>(Nom.)</i>, einen {b} Freund <i>(Akk.)</i>, einem {b} Freund <i>(Dat.)</i>", a: ['großzügiger', 'großzügigen', 'großzügigen'], tip: "Nach <i>ein-</i>: Nom. -er, Akk. -en, Dat. -en." },
-        { t: 'fill', q: "die {b} Frau <i>(Nom.)</i>, die {b} Frau <i>(Akk.)</i>, der {b} Frau <i>(Dat.)</i>", a: ['ehrgeizige', 'ehrgeizige', 'ehrgeizigen'], tip: "Nach <i>die</i>: Nom./Akk. -e, Dat. -en." },
+        { t: 'fill', q: "Dekliniere <b>großzügig</b>: ein {b} Freund <i>(Nom.)</i>, einen {b} Freund <i>(Akk.)</i>, einem {b} Freund <i>(Dat.)</i>", a: ['großzügiger', 'großzügigen', 'großzügigen'], ph: ['großzügig', 'großzügig', 'großzügig'], tip: "Nach <i>ein-</i>: Nom. -er, Akk. -en, Dat. -en." },
+        { t: 'fill', q: "Dekliniere <b>ehrgeizig</b>: die {b} Frau <i>(Nom.)</i>, die {b} Frau <i>(Akk.)</i>, der {b} Frau <i>(Dat.)</i>", a: ['ehrgeizige', 'ehrgeizige', 'ehrgeizigen'], ph: ['ehrgeizig', 'ehrgeizig', 'ehrgeizig'], tip: "Nach <i>die</i>: Nom./Akk. -e, Dat. -en." },
         { t: 'choice', q: "Mein Chef ist sehr ___.", opts: ['großzügig', 'großzügiger'], a: 0, tip: "Nach <i>sein</i> steht das Adjektiv <b>ohne Endung</b>." },
         { t: 'open', q: "Bilde 3 Sätze über deine Freunde — je ein Adjektiv (z. B. <i>zuverlässig, witzig, neugierig</i>).", sol: "z. B.:\n• Mein bester Freund ist sehr <b>zuverlässig</b>.\n• Ich habe eine <b>witzige</b> Kollegin.\n• Meine <b>neugierige</b> Schwester fragt alles." }
       ]
     },
     {
-      n: 2, week: 1, tag: "Pronomen", topic: "Personalpronomen (Akk. / Dat.)", lessonNum: 2,
+      n: 2, week: 1, tag: "Pronomen", topic: "Personalpronomen (Akk. / Dat.)", lessonNum: 2, extraLessonNum: 10,
       erklaerung: {
         lead: "Personalpronomen ändern die Form je nach <b>Kasus</b>: <i>ich → mich → mir</i>. <b>Dativ-Pronomen</b> brauchst du ständig nach Verben wie <i>helfen, gefallen, gehören, vertrauen, danken</i>.",
         rules: [
@@ -56,8 +56,8 @@ window.DAILY_PLAN = {
       },
       ex: [
         { t: 'choice', q: "Ich vertraue ___.", opts: ['dir', 'dich'], a: 0, tip: "<i>vertrauen</i> + <b>Dativ</b>." },
-        { t: 'fill', q: "Meine Schwester hilft {b} immer. <i>(ich)</i>", a: ['mir'], tip: "<i>helfen</i> + <b>Dativ</b> → mir." },
-        { t: 'fill', q: "Ich streite mich oft mit {b}. <i>(sie – meine Schwester)</i>", a: ['ihr'], tip: "<i>mit</i> + <b>Dativ</b> → ihr." },
+        { t: 'fill', q: "Meine Schwester hilft {b} immer. <i>(ich)</i>", a: ['mir'], ph: ['ich'], tip: "<i>helfen</i> + <b>Dativ</b> → mir." },
+        { t: 'fill', q: "Ich streite mich oft mit {b}. <i>(sie – meine Schwester)</i>", a: ['ihr'], ph: ['sie'], tip: "<i>mit</i> + <b>Dativ</b> → ihr." },
         { t: 'open', q: "Übersetze: „My siblings support me a lot.“", sol: "<b>Meine Geschwister unterstützen mich sehr.</b>" }
       ]
     },
@@ -82,7 +82,7 @@ window.DAILY_PLAN = {
       ]
     },
     {
-      n: 4, week: 1, tag: "viel / viele", topic: "viel vs. viele", lessonNum: 7,
+      n: 4, week: 1, tag: "viel / viele", topic: "viel vs. viele", lessonNum: 7, extraLessonNum: 11,
       erklaerung: {
         lead: "<b>viel</b> steht bei <b>nicht zählbaren</b> Nomen (Singular): <i>viel Zeit, viel Geld, viel Erfolg</i>. <b>viele</b> steht bei <b>zählbaren</b> Nomen (Plural): <i>viele Träume, viele Ziele</i>.",
         note: "Test: Kannst du „1, 2, 3 …“ zählen? → <b>viele</b>. Sonst → <b>viel</b>."
@@ -103,13 +103,13 @@ window.DAILY_PLAN = {
       ex: [
         { t: 'choice', q: "Ich habe ___ Freunde.", opts: ['viele', 'viel'], a: 0, tip: "Freunde = zählbar → <b>viele</b> (+ Plural <i>Freunde</i>, nicht <i>Freunden</i>)." },
         { t: 'choice', q: "… Freunde, ___ mir helfen.", opts: ['die', 'dass'], a: 0, tip: "Nach dem Nomen → Relativpronomen <b>die</b>." },
-        { t: 'fill', q: "Ich freue mich auf {b} Urlaub. <i>(mein)</i>", a: ['meinen'], tip: "<i>sich freuen auf</i> + <b>Akkusativ</b> → meinen." },
+        { t: 'fill', q: "Ich freue mich auf {b} Urlaub. <i>(mein)</i>", a: ['meinen'], ph: ['mein'], tip: "<i>sich freuen auf</i> + <b>Akkusativ</b> → meinen." },
         { t: 'open', q: "Bilde einen Satz über die Natur in Uruguay mit einem Relativsatz (<i>die/der/das</i>).", sol: "z. B.: <b>Uruguay hat Strände, die wunderschön sind.</b>" }
       ]
     },
     // ---------------- Woche 2 ----------------
     {
-      n: 6, week: 2, tag: "sein · Hilfsverben", topic: "sein/seid/sind + haben/sein im Perfekt", lessonNum: 17,
+      n: 6, week: 2, tag: "sein · Hilfsverben", topic: "sein/seid/sind + haben/sein im Perfekt", lessonNum: 17, extraLessonNum: 12,
       erklaerung: {
         lead: "<b>seid</b> = nur <i>ihr</i>. <b>sind</b> = <i>wir / sie / Sie</i>. Im <b>Perfekt</b> gilt: <b>sein</b> bei Bewegungs-/Zustandsverben (<i>gehen, kommen, fahren, aufstehen</i>), sonst <b>haben</b>.",
         examples: [
@@ -135,14 +135,14 @@ window.DAILY_PLAN = {
         ]
       },
       ex: [
-        { t: 'fill', q: "Ich {b} morgen über meine Meinung sprechen. <i>(Futur)</i>", a: ['werde'], tip: "<i>ich</i> + Futur → <b>werde</b>." },
+        { t: 'fill', q: "Ich {b} morgen über meine Meinung sprechen. <i>(werden · Futur)</i>", a: ['werde'], ph: ['werden'], tip: "<i>ich</i> + Futur → <b>werde</b>." },
         { t: 'choice', q: "___ du mir zustimmen? <i>(höfliche Frage)</i>", opts: ['Würdest', 'Wirst'], a: 0, tip: "Höflich/hypothetisch → Konjunktiv II <b>würdest</b>." },
         { t: 'open', q: "Übersetze: „He will disagree with the plan.“", sol: "<b>Er wird dem Plan widersprechen.</b>" },
         { t: 'open', q: "Bilde einen <i>würde</i>-Satz über einen Wunsch.", sol: "z. B.: <b>Ich würde gern mehr reisen.</b>" }
       ]
     },
     {
-      n: 8, week: 2, tag: "Nebensatz", topic: "Nebensatz-Wortstellung", lessonNum: 19,
+      n: 8, week: 2, tag: "Nebensatz", topic: "Nebensatz-Wortstellung", lessonNum: 19, extraLessonNum: 16,
       erklaerung: {
         lead: "Dein Dauerthema! Konjunktionen wie <b>dass, weil, obwohl, wenn</b> schicken das <b>konjugierte Verb ans Satzende</b>.",
         examples: [
@@ -152,9 +152,9 @@ window.DAILY_PLAN = {
         note: "Modalverben stehen ganz am <b>Ende</b>: <i>…, dass wir anstoßen <b>sollten</b>.</i>"
       },
       ex: [
-        { t: 'fill', q: "Wir feiern, weil es ein Feiertag {b}. <i>(sein)</i>", a: ['ist'], tip: "Verb im <i>weil</i>-Satz steht <b>am Ende</b>." },
-        { t: 'fill', q: "Ich komme zur Feier, obwohl ich müde {b}. <i>(sein)</i>", a: ['bin'], tip: "Verb im <i>obwohl</i>-Satz steht <b>am Ende</b>." },
-        { t: 'fill', q: "Ich glaube, dass wir auf Weihnachten anstoßen {b}. <i>(sollen)</i>", a: [['sollten', 'sollen']], tip: "Modalverb ans <b>Ende</b>: <i>… anstoßen sollten.</i>" },
+        { t: 'fill', q: "Wir feiern, weil es ein Feiertag {b}. <i>(sein)</i>", a: ['ist'], ph: ['sein'], tip: "Verb im <i>weil</i>-Satz steht <b>am Ende</b>." },
+        { t: 'fill', q: "Ich komme zur Feier, obwohl ich müde {b}. <i>(sein)</i>", a: ['bin'], ph: ['sein'], tip: "Verb im <i>obwohl</i>-Satz steht <b>am Ende</b>." },
+        { t: 'fill', q: "Ich glaube, dass wir auf Weihnachten anstoßen {b}. <i>(sollen)</i>", a: [['sollten', 'sollen']], ph: ['sollen'], tip: "Modalverb ans <b>Ende</b>: <i>… anstoßen sollten.</i>" },
         { t: 'open', q: "Bilde einen <i>wenn</i>-Satz über eine Familientradition aus Uruguay.", sol: "z. B.: <b>Wenn wir Weihnachten feiern, kochen wir immer zusammen.</b>" }
       ]
     },
@@ -169,19 +169,19 @@ window.DAILY_PLAN = {
       },
       ex: [
         { t: 'choice', q: "Wir kämpfen ___ die Umweltverschmutzung.", opts: ['gegen', 'für'], a: 0, tip: "Kampf gegen etwas → <b>gegen</b>." },
-        { t: 'fill', q: "{b} einem Jahr recycle ich mehr. <i>(temporal, seit …)</i>", a: ['Seit'], tip: "Dauer bis heute → <b>seit</b> + Dativ." },
+        { t: 'fill', q: "{b} einem Jahr recycle ich mehr. <i>(temporale Präposition)</i>", a: ['Seit'], ph: ['seit / vor / an?'], tip: "Dauer bis heute → <b>seit</b> + Dativ." },
         { t: 'choice', q: "Das Plastik liegt ___ Tisch. <i>(wo?)</i>", opts: ['auf dem', 'auf den'], a: 0, tip: "wo? → <b>Dativ</b> (dem)." },
         { t: 'choice', q: "Ich gehe ___ Stadt, um plastikfrei einzukaufen. <i>(wohin?)</i>", opts: ['in die', 'in der'], a: 0, tip: "wohin? → <b>Akkusativ</b> (die)." }
       ]
     },
     {
-      n: 10, week: 2, tag: "Wiederholung 2", topic: "Wiederholung Woche 2", lessonNum: 6,
+      n: 10, week: 2, tag: "Wiederholung 2", topic: "Wiederholung Woche 2", lessonNum: 6, extraLessonNum: 20,
       erklaerung: {
         lead: "<b>Verben + Nebensatz + Präpositionen</b> zusammen. Heute schreibst du einen Mini-Text (nur für dich) mit möglichst vielen dieser Strukturen.",
         note: "Achte am Satzende auf die richtige Verbform: <i>… dass ich die Prüfung <b>bestehen werde</b>.</i>"
       },
       ex: [
-        { t: 'fill', q: "Ich hoffe, dass ich die Prüfung {b} werde. <i>(bestehen)</i>", a: ['bestehen'], tip: "Infinitiv vor dem konjugierten Verb: <i>… bestehen werde.</i>" },
+        { t: 'fill', q: "Ich hoffe, dass ich die Prüfung {b} werde. <i>(bestehen)</i>", a: ['bestehen'], ph: ['bestehen'], tip: "Infinitiv vor dem konjugierten Verb: <i>… bestehen werde.</i>" },
         { t: 'open', q: "Schreib 3–4 Sätze über deine Ausbildung/Karriere — nutze <b>weil</b>, <b>dass</b> und mindestens 2 Präpositionen.", sol: "z. B.: <b>Ich habe eine Ausbildung gemacht, weil ich praktische Erfahrung wollte. Ich glaube, dass ich viel gelernt habe. Seit einem Jahr arbeite ich bei einer Firma in Berlin.</b>" },
         { t: 'open', q: "Nenne 3 Grammatikthemen aus Woche 2, die noch wackelig sind.", sol: "Nur für dich — kein „richtig/falsch“. Schick die Liste zur Korrektur." }
       ]
@@ -230,7 +230,7 @@ window.DAILY_PLAN = {
       },
       ex: [
         { t: 'choice', q: "Ich habe eine Reise gebucht, ___ drei Wochen dauerte.", opts: ['die', 'das', 'dass'], a: 0, tip: "Nomen <i>Reise</i> (feminin) → Relativpronomen <b>die</b>." },
-        { t: 'fill', q: "Wir sind {b} Italien gefahren. <i>(Land ohne Artikel)</i>", a: ['nach'], tip: "Länder ohne Artikel → <b>nach</b>." },
+        { t: 'fill', q: "Wir sind {b} Italien gefahren. <i>(Land ohne Artikel)</i>", a: ['nach'], ph: ['nach / in?'], tip: "Länder ohne Artikel → <b>nach</b>." },
         { t: 'open', q: "Schreib 4–5 Sätze über eine Reise: mit einem Relativsatz, einer Präposition und einem Perfekt-Satz.", sol: "z. B.: <b>Letztes Jahr bin ich nach Spanien geflogen. Ich habe eine Stadt besucht, die sehr alt ist. Trotz einer Verspätung war die Reise toll.</b>" }
       ]
     },
@@ -242,7 +242,7 @@ window.DAILY_PLAN = {
       },
       ex: [
         { t: 'choice', q: "Ich freue mich schon ___ den Urlaub.", opts: ['auf', 'über'], a: 0, tip: "Vorfreude (Zukunft) → <b>sich freuen auf</b>." },
-        { t: 'fill', q: "Ich bin sehr {b}, dass ich bestanden habe. <i>(proud)</i>", a: ['stolz'], tip: "proud → <b>stolz</b>." },
+        { t: 'fill', q: "Ich bin sehr {b}, dass ich bestanden habe. <i>(proud)</i>", a: ['stolz'], ph: ['proud →'], tip: "proud → <b>stolz</b>." },
         { t: 'open', q: "Wähl 2 unsichere Themen (W1–W3) und bilde je 2 Sätze mit einem Emotions-Adjektiv (<i>dankbar, stolz, enttäuscht …</i>).", sol: "z. B.: <b>Ich bin dankbar, dass du mir hilfst. Ich war überrascht, weil der Test leicht war.</b>" }
       ]
     },

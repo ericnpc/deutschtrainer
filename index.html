@@ -1202,6 +1202,39 @@ A: Bis Samstag, ich freue mich!`,
     `;
   }
 
+  // Inline "bonus" vocabulary baked into certain plan days (collapsible)
+  function renderExtraVocab(d) {
+    if (d.extraLessonNum == null) return '';
+    const idx = lessonIdxByNum(d.extraLessonNum);
+    if (idx < 0) return '';
+    const lesson = LESSONS[idx];
+    const isOpen = !!(state.planExtraOpen && state.planExtraOpen[d.n]);
+    const rows = lesson.words.map(w => `
+      <div class="flex items-baseline gap-3 px-4 py-1.5 text-sm">
+        <span class="font-semibold text-flag-ink flex-1">${escapeHtml(w.german)}</span>
+        <span class="text-neutral-500 flex-1 text-right">${escapeHtml(w.english)}</span>
+      </div>`).join('');
+    return `
+      <details class="mt-3 rounded-2xl bg-white border border-teal-200 overflow-hidden group" ${isOpen ? 'open' : ''}>
+        <summary data-action="toggle-extra-vocab" data-day="${d.n}"
+                 class="cursor-pointer list-none p-3.5 flex items-center gap-2.5 hover:bg-teal-50 transition">
+          <span class="text-lg shrink-0">✨</span>
+          <div class="min-w-0 flex-1">
+            <div class="text-[11px] uppercase tracking-wider font-bold text-teal-600">Extra-Vokabeln</div>
+            <div class="font-bold text-sm leading-snug">Lektion ${d.extraLessonNum}: ${escapeHtml(lesson.title)}</div>
+          </div>
+          <span class="shrink-0 text-[11px] text-neutral-400">${lesson.words.length} Wörter</span>
+          <span class="shrink-0 text-neutral-300 text-lg transition-transform group-open:rotate-90">→</span>
+        </summary>
+        <div class="border-t border-teal-100 divide-y divide-neutral-100">${rows}</div>
+        <div class="p-3 border-t border-teal-100">
+          <button data-action="open-vocab-list" data-lesson="${idx}" data-back="plan-day"
+                  class="w-full py-2 rounded-xl bg-flag-ink text-white text-sm font-bold hover:bg-neutral-800 transition">Als Karten lernen (Learn / Drill)</button>
+        </div>
+      </details>
+    `;
+  }
+
   // ---- 15-day plan: home grid ----
   // Uses only classes with valid Tailwind shades (flag-* are flat, so bars use standard palette).
   function planTileAccent(week) {
@@ -1331,6 +1364,7 @@ A: Bis Samstag, ich freue mich!`,
       <main class="${anim}">
         ${erkl}
         ${planVocabLink(d, 'plan-day')}
+        ${renderExtraVocab(d)}
         ${exHeader}
         <div class="flex flex-col gap-3">${exercises}</div>
       </main>
@@ -1393,9 +1427,11 @@ A: Bis Samstag, ich freue mich!`,
         const cls = checked
           ? (ok ? 'border-teal-400 bg-teal-50 text-teal-800' : 'border-red-300 bg-red-50 text-red-700')
           : 'border-neutral-300 focus:border-flag-ink';
+        const ph = (ex.ph && ex.ph[bi] != null) ? ex.ph[bi] : '…';
         q += `<input type="text" data-plan-fill data-key="${key}" data-blank="${bi}" value="${escapeHtml(val)}"
+                placeholder="${escapeHtml(ph)}"
                 autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"
-                class="inline-block mx-1 px-2 py-0.5 w-32 align-baseline rounded-lg border-2 ${cls} text-center font-semibold outline-none">`;
+                class="inline-block mx-1 px-2 py-0.5 w-36 align-baseline rounded-lg border-2 ${cls} text-center font-semibold outline-none placeholder:font-normal placeholder:text-neutral-400">`;
         bi++;
       }
     });
@@ -2964,6 +3000,16 @@ A: Bis Samstag, ich freue mich!`,
         snapshotPlanInputs();
         const st = planExState(t.dataset.key);
         st.revealed = !st.revealed;
+        render();
+        break;
+      }
+      case 'toggle-extra-vocab': {
+        // Drive the <details> from state so re-renders keep it open, preserving typed answers
+        e.preventDefault();
+        snapshotPlanInputs();
+        const day = t.dataset.day;
+        if (!state.planExtraOpen) state.planExtraOpen = {};
+        if (state.planExtraOpen[day]) delete state.planExtraOpen[day]; else state.planExtraOpen[day] = 1;
         render();
         break;
       }
