@@ -2,7 +2,7 @@
 // Cache-first for same-origin requests. Pre-caches every asset on install.
 // Bump CACHE_VERSION when shipping a change so clients pick it up cleanly.
 
-const CACHE_VERSION = 'b1trainer-v7';
+const CACHE_VERSION = 'b1trainer-v8';
 
 const PRECACHE = [
   './',

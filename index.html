@@ -339,6 +339,16 @@
   }
   function getMeta() { return loadState().meta; }
   function setMeta(m) { const s = loadState(); s.meta = m; saveState(s); }
+
+  // ---- 15-day plan: whole-day "done" flags (persisted) ----
+  function isDayDone(n) { const s = loadState(); return !!(s.planDayDone || {})[n]; }
+  function setDayDone(n, v) {
+    const s = loadState();
+    if (!s.planDayDone) s.planDayDone = {};
+    if (v) s.planDayDone[n] = 1; else delete s.planDayDone[n];
+    saveState(s);
+  }
+  function planDoneCount() { const s = loadState(); return Object.keys(s.planDayDone || {}).length; }
   function clearAllProgress() {
     localStorage.removeItem(STATE_KEY);
     localStorage.removeItem(LEGACY_VOCAB_KEY);
@@ -1246,20 +1256,24 @@ A: Bis Samstag, ich freue mich!`,
   }
   function renderPlanGrid() {
     const p = DAILY_PLAN;
+    const done = planDoneCount();
     const tiles = p.days.map((d, i) => {
       const a = planTileAccent(d.week);
+      const isDone = isDayDone(d.n);
       return `
         <button data-action="open-plan-day" data-day="${i}"
-                class="hub-card relative overflow-hidden rounded-2xl bg-white border border-neutral-200 ${a.hover} p-2.5 flex flex-col items-center justify-start text-center min-h-[5.75rem]">
-          <span class="absolute left-0 top-0 bottom-0 w-1 ${a.bar}"></span>
-          <div class="text-2xl font-extrabold text-flag-ink leading-none mt-0.5">${d.n}</div>
-          <div class="text-[10px] leading-tight text-neutral-500 mt-1">${escapeHtml(d.tag)}</div>
+                class="hub-card relative overflow-hidden rounded-2xl border p-2.5 flex flex-col items-center justify-start text-center min-h-[5.75rem] ${isDone ? 'bg-teal-50 border-teal-300' : `bg-white border-neutral-200 ${a.hover}`}">
+          <span class="absolute left-0 top-0 bottom-0 w-1 ${isDone ? 'bg-teal-400' : a.bar}"></span>
+          ${isDone ? `<span class="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-teal-500 text-white text-[10px] font-bold flex items-center justify-center leading-none">✓</span>` : ''}
+          <div class="text-2xl font-extrabold leading-none mt-0.5 ${isDone ? 'text-teal-700' : 'text-flag-ink'}">${d.n}</div>
+          <div class="text-[10px] leading-tight mt-1 ${isDone ? 'text-teal-600' : 'text-neutral-500'}">${escapeHtml(d.tag)}</div>
         </button>`;
     }).join('');
     return `
       <section class="mb-8">
-        <div class="flex items-baseline justify-between mb-1">
+        <div class="flex items-baseline justify-between gap-3 mb-1">
           <h2 class="text-xl font-extrabold tracking-tight">📅 15-Tage-Plan</h2>
+          ${done > 0 ? `<span class="shrink-0 text-xs font-bold text-teal-600">${done}/15 erledigt</span>` : ''}
         </div>
         <p class="text-xs text-neutral-500 mb-3">${escapeHtml(p.subtitle)} · tippe einen Tag an</p>
         <div class="grid grid-cols-3 sm:grid-cols-5 gap-2.5">${tiles}</div>
@@ -1338,6 +1352,17 @@ A: Bis Samstag, ich freue mich!`,
       </div>
     `;
     const exercises = d.ex.map((ex, idx) => renderPlanExercise(d.n, idx, ex)).join('');
+    const dayDone = isDayDone(d.n);
+    const doneToggle = `
+      <div class="mt-8 pt-5 border-t border-neutral-200">
+        <button data-action="toggle-day-done" data-day="${d.n}"
+                class="w-full py-3.5 rounded-2xl font-bold transition flex items-center justify-center gap-2 ${dayDone ? 'bg-teal-500 text-white hover:bg-teal-600' : 'bg-flag-ink text-white hover:bg-neutral-800'}">
+          ${dayDone
+            ? '<span>✓ Tag erledigt</span><span class="font-normal text-teal-100 text-sm">— tippen zum Zurücksetzen</span>'
+            : '<span>Tag als erledigt markieren</span>'}
+        </button>
+      </div>
+    `;
     return header + `
       <main class="${anim}">
         ${erkl}
@@ -1345,6 +1370,7 @@ A: Bis Samstag, ich freue mich!`,
         ${renderExtraVocab(d)}
         ${exHeader}
         <div class="flex flex-col gap-3">${exercises}</div>
+        ${doneToggle}
       </main>
     `;
   }
@@ -2978,6 +3004,13 @@ A: Bis Samstag, ich freue mich!`,
         snapshotPlanInputs();
         const st = planExState(t.dataset.key);
         st.revealed = !st.revealed;
+        render();
+        break;
+      }
+      case 'toggle-day-done': {
+        snapshotPlanInputs();
+        const n = t.dataset.day;
+        setDayDone(n, !isDayDone(n));
         render();
         break;
       }

@@ -10,7 +10,7 @@
 //   q / sol / lead / rules / examples / note / tip enthalten bewusst HTML (<b>,<i>) — statische Autorendaten.
 window.DAILY_PLAN = {
   title: "Erics Ergänzungsplan",
-  subtitle: "21. Juli – 8. August · 15 Tage",
+  subtitle: "15 Tage · Grammatik + Vokabeln",
   // Lektionen außerhalb des Plans (10/11/12/16/20) sind über die day.extraLessonNum
   // in Tag 2/4/6/8/10 eingebettet ("Extra-Vokabeln").
   weekTitles: ["Grammatik-Fundament", "Verben & Strukturen", "Konsolidierung"],
