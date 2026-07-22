@@ -1263,29 +1263,7 @@ A: Bis Samstag, ich freue mich!`,
         </div>
         <p class="text-xs text-neutral-500 mb-3">${escapeHtml(p.subtitle)} · tippe einen Tag an</p>
         <div class="grid grid-cols-3 sm:grid-cols-5 gap-2.5">${tiles}</div>
-        ${renderPlanExtras()}
       </section>
-    `;
-  }
-  function renderPlanExtras() {
-    const extras = (DAILY_PLAN.extras || [])
-      .map(e => ({ ...e, idx: lessonIdxByNum(e.num) }))
-      .filter(x => x.idx >= 0);
-    if (!extras.length) return '';
-    const tiles = extras.map((e, i) => `
-      <button data-action="open-vocab-list" data-lesson="${e.idx}" data-back="hub"
-              class="hub-card relative overflow-hidden rounded-2xl bg-white border border-neutral-200 hover:border-flag-gold p-2.5 flex flex-col items-center justify-start text-center min-h-[5.75rem]">
-        <span class="absolute left-0 top-0 bottom-0 w-1 bg-flag-gold"></span>
-        <div class="text-[9px] uppercase tracking-wider text-flag-gold font-bold mt-0.5">Extra</div>
-        <div class="text-2xl font-extrabold text-flag-ink leading-none">${i + 1}</div>
-        <div class="text-[10px] leading-tight text-neutral-500 mt-1">${escapeHtml(e.tag)}</div>
-      </button>`).join('');
-    return `
-      <div class="mt-7">
-        <h3 class="text-sm font-extrabold text-neutral-700 mb-1">🎯 Extra — bei Zeit frei einstreuen</h3>
-        <p class="text-xs text-neutral-500 mb-3">Nicht im Plan, aber nützlich, wann immer du willst.</p>
-        <div class="grid grid-cols-3 sm:grid-cols-5 gap-2.5">${tiles}</div>
-      </div>
     `;
   }
 

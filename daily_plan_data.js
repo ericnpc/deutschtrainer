@@ -11,14 +11,8 @@
 window.DAILY_PLAN = {
   title: "Erics Ergänzungsplan",
   subtitle: "21. Juli – 8. August · 15 Tage",
-  // Vokabel-Lektionen außerhalb des Plans — als „Extra“-Tage präsentiert
-  extras: [
-    { num: 10, tag: "Connectors" },
-    { num: 11, tag: "Storytelling" },
-    { num: 12, tag: "Media & Tech" },
-    { num: 16, tag: "Haushalt" },
-    { num: 20, tag: "Integration" }
-  ],
+  // Lektionen außerhalb des Plans (10/11/12/16/20) sind über die day.extraLessonNum
+  // in Tag 2/4/6/8/10 eingebettet ("Extra-Vokabeln").
   weekTitles: ["Grammatik-Fundament", "Verben & Strukturen", "Konsolidierung"],
   days: [
     // ---------------- Woche 1 ----------------
